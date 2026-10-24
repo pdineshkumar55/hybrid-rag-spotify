@@ -1,0 +1,554 @@
+[
+  {
+    "page_content": "[1. Tech Stack Overview > Frontend]\n- Next.js (React + TypeScript) for SSR/SSG and SPA behavior.\n- Tailwind CSS with a component library (e.g. Headless UI/Radix UI style).\n- React Query (TanStack Query) for server state.\n- Zustand/Recoil/Jotai for global player state.\n- HLS.js + HTML5 Audio / Web Audio API for playback & visualizations.\n- OAuth2 / OIDC-based auth integration with backend.\n- PWA features for installable app and offline caching of some metadata.",
+    "metadata": {
+      "chunk_id": "spotify-s01-01",
+      "project": "spotify",
+      "section_no": 1,
+      "section": "Tech Stack Overview",
+      "subsection": "Frontend",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[1. Tech Stack Overview > Backend]\n- Node.js + TypeScript.\n- NestJS for modular architecture, DI, microservices support.\n- REST for external APIs, gRPC or message bus (Kafka/NATS/RabbitMQ) for internal communication.\n- API Gateway (Nginx/Envoy/Kong) for routing, rate-limiting, auth at edge.",
+    "metadata": {
+      "chunk_id": "spotify-s01-02",
+      "project": "spotify",
+      "section_no": 1,
+      "section": "Tech Stack Overview",
+      "subsection": "Backend",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[1. Tech Stack Overview > Databases & Storage]\n- PostgreSQL for relational data (users, playlists, subscriptions, etc.).\n- Redis for caching and sessions.\n- Elasticsearch/OpenSearch for full-text search & autocomplete.\n- ClickHouse or similar data warehouse for analytics events.\n- S3-compatible object storage for audio and images.\n- CDN (CloudFront/Fastly/Cloudflare) for asset and audio delivery.",
+    "metadata": {
+      "chunk_id": "spotify-s01-03",
+      "project": "spotify",
+      "section_no": 1,
+      "section": "Tech Stack Overview",
+      "subsection": "Databases & Storage",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[1. Tech Stack Overview > Infrastructure & DevOps]\n- Docker for containerization.\n- Kubernetes (GKE/EKS/AKS) for orchestration.\n- Vault / Secrets Manager for secrets.\n- CI/CD via GitHub Actions / GitLab CI.\n- Observability via Prometheus + Grafana, central logging, and tracing with OpenTelemetry.",
+    "metadata": {
+      "chunk_id": "spotify-s01-04",
+      "project": "spotify",
+      "section_no": 1,
+      "section": "Tech Stack Overview",
+      "subsection": "Infrastructure & DevOps",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 1) API Gateway / Backend for Frontend (BFF)]\n- Single HTTP entrypoint for clients.\n- Handles auth, rate-limiting, schema validation.\n- Aggregates data from underlying microservices.",
+    "metadata": {
+      "chunk_id": "spotify-s02-01",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "1) API Gateway / Backend for Frontend (BFF)",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 2) Auth & Identity Service]\n- User registration/login, password reset, social logins.\n- JWT/opaque token issuance and refresh tokens.\n- Device sessions management.\n- Core tables: users, credentials, sessions, devices.",
+    "metadata": {
+      "chunk_id": "spotify-s02-02",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "2) Auth & Identity Service",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 3) User Profile Service]\n- Manages display name, avatar, profile settings.\n- User preferences (language, explicit content filter, theme).\n- Core tables: user_profile, user_settings.",
+    "metadata": {
+      "chunk_id": "spotify-s02-03",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "3) User Profile Service",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 4) Catalog Service (Music Metadata)]\n- Stores metadata for tracks, albums, artists, genres, moods.\n- Manages relationships: album-track, artist-track, etc.\n- Core tables: artists, albums, tracks, genres, moods, track_audio_files.",
+    "metadata": {
+      "chunk_id": "spotify-s02-04",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "4) Catalog Service (Music Metadata)",
+      "page": 1,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 5) Search & Discovery Index Service]\n- Indexes tracks, albums, artists, playlists, podcasts.\n- Autocomplete suggestions.\n- Powered by Elasticsearch/OpenSearch.",
+    "metadata": {
+      "chunk_id": "spotify-s02-05",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "5) Search & Discovery Index Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 6) Library & Playlist Service]\n- Implements “Your Library” (liked songs, saved albums, followed artists).\n- Manages playlists (create, edit, delete, reorder, collaborative, privacy).\n- Core tables: playlists, playlist_tracks, user_liked_tracks, user_saved_albums,\nuser_followed_artists, user_followed_playlists.",
+    "metadata": {
+      "chunk_id": "spotify-s02-06",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "6) Library & Playlist Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 7) Playback & Session Service]\n- Stores playback state (current track, position, shuffle, repeat, queue).\n- Manages playback sessions and active devices.\n- Provides WebSocket channel for real-time player updates.\n- Core tables: devices, playback_sessions, playback_queue.",
+    "metadata": {
+      "chunk_id": "spotify-s02-07",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "7) Playback & Session Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 8) Streaming / Media Delivery Service]\n- Generates secure signed URLs to audio HLS manifests/segments.\n- Enforces subscription tier (bitrate, ads vs ad-free).\n- Logs stream-start events for analytics.",
+    "metadata": {
+      "chunk_id": "spotify-s02-08",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "8) Streaming / Media Delivery Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 9) Recommendation & Personalization Service]\n- Personalized homepage and playlists (Discover Weekly-like, Daily Mix, Radios).\n- Computes user and item embeddings using listening history and audio features.\n- Serves recommendations by seeds (artists, tracks, genres).",
+    "metadata": {
+      "chunk_id": "spotify-s02-09",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "9) Recommendation & Personalization Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 10) Social & Activity Service]\n- Following system between users.\n- Friend activity feed (“X is listening to…”).\n- Collaborative playlist permissions and activity.\n- Link shortening and share tracking.",
+    "metadata": {
+      "chunk_id": "spotify-s02-10",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "10) Social & Activity Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 11) Subscription & Billing Service]\n- Manages subscription plans (Free, Premium, Family, Student).\n- Integrates with payment gateways (Stripe/Razorpay/etc.).\n- Handles trials, renewals, invoicing, and cancellations.\n- Core tables: plans, subscriptions, invoices, payment_methods.",
+    "metadata": {
+      "chunk_id": "spotify-s02-11",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "11) Subscription & Billing Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 12) Ads Service (Free Tier)]\n- Manages ad campaigns, creatives, and targeting rules.\n- Decides which audio ad to serve.\n- Tracks impressions, clicks, frequency caps.\n- Core tables: ad_campaigns, ad_creatives, ad_impressions, ad_events.",
+    "metadata": {
+      "chunk_id": "spotify-s02-12",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "12) Ads Service (Free Tier)",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 13) Content Ingestion & Creator Portal Service]\n- Artist/label portal: upload tracks, edit metadata, manage catalogs.\n- Podcast ingestion and hosting (episodes, RSS import).\n- Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
+    "metadata": {
+      "chunk_id": "spotify-s02-13",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "13) Content Ingestion & Creator Portal Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 14) Media Processor Service]\n- Background worker for transcoding uploads (FFmpeg).\n- Creates multiple bitrates and HLS manifests.\n- Generates waveforms, loudness normalization, and audio analysis.\n- Writes processed files to object storage and notifies Catalog/Streaming services.",
+    "metadata": {
+      "chunk_id": "spotify-s02-14",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "14) Media Processor Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 15) Analytics & Events Service]\n- Central ingestion point for all user and system events.\n- Stores events in ClickHouse/warehouse.\n- Provides aggregated analytics for internal dashboards and creator analytics.\n- Feeds Recommendation Service with listening data.",
+    "metadata": {
+      "chunk_id": "spotify-s02-15",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "15) Analytics & Events Service",
+      "page": 2,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 16) Notification Service]\n- Sends emails, push notifications, and in-app notifications.\n- Supports notification templates and user preference management.\n- Digest emails for new releases, playlist updates, etc.",
+    "metadata": {
+      "chunk_id": "spotify-s02-16",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "16) Notification Service",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[2. Microservices (High-Level) > 17) Admin & Backoffice Service]\n- Admin panel for staff: user search, content management, moderation.\n- Feature flags and configuration (A/B testing).\n- System metrics and health views.",
+    "metadata": {
+      "chunk_id": "spotify-s02-17",
+      "project": "spotify",
+      "section_no": 2,
+      "section": "Microservices (High-Level)",
+      "subsection": "17) Admin & Backoffice Service",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > PostgreSQL]\n- Users, profiles, subscriptions, playlists, follows.\n- Metadata for tracks, albums, artists (or partially split with a separate catalog DB if\nneeded).",
+    "metadata": {
+      "chunk_id": "spotify-s03-01",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "PostgreSQL",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > Redis]\n- Authentication/session cache.\n- Playback state cache (optionally).\n- Rate limits and hot metadata caches (trending playlists, top charts).",
+    "metadata": {
+      "chunk_id": "spotify-s03-02",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "Redis",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > Elasticsearch/OpenSearch]\n- Full-text index of tracks, artists, albums, playlists, and podcasts.\n- Autocomplete index and suggestion index.",
+    "metadata": {
+      "chunk_id": "spotify-s03-03",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "Elasticsearch/OpenSearch",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > ClickHouse / Data Warehouse]\n- Playback events (play, pause, skip, complete).\n- Search events and clicks.\n- Aggregations: daily active users, time listened, streams per track, etc.",
+    "metadata": {
+      "chunk_id": "spotify-s03-04",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "ClickHouse / Data Warehouse",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > Object Storage (S3-like) + CDN]\n- HLS segments and manifests per track and bitrate.\n- Cover images, avatars, thumbnails.\n- Podcast episodes.",
+    "metadata": {
+      "chunk_id": "spotify-s03-05",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "Object Storage (S3-like) + CDN",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[3. Data Storage Layout > Message Queue (Kafka/NATS/RabbitMQ)]\n- track_uploaded, track_encoded, playback_event, subscription_updated, notification events.",
+    "metadata": {
+      "chunk_id": "spotify-s03-06",
+      "project": "spotify",
+      "section_no": 3,
+      "section": "Data Storage Layout",
+      "subsection": "Message Queue (Kafka/NATS/RabbitMQ)",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[4. Frontend Structure (Next.js) > Public]\n- /           → Landing/marketing page.\n- /login      → Auth.\n- /signup     → Auth.\n- /artist/:id → Public artist view.\n- /album/:id  → Public album view or preview.",
+    "metadata": {
+      "chunk_id": "spotify-s04-01",
+      "project": "spotify",
+      "section_no": 4,
+      "section": "Frontend Structure (Next.js)",
+      "subsection": "Public",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[4. Frontend Structure (Next.js) > Authenticated app]\n- /home                       → Personalized home feed.\n- /search                     → Full search UI.\n- /collection/tracks          → Liked songs.\n- /collection/playlists       → User playlists.\n- /collection/albums          → Saved albums.\n- /collection/artists         → Followed artists.\n- /playlist/:id               → Playlist details & play.\n- /queue                      → Queue detail (could also be a modal).\n- /settings/account           → Account info.\n- /settings/subscription      → Plan & billing.\n- /settings/privacy           → Content & privacy preferences.",
+    "metadata": {
+      "chunk_id": "spotify-s04-02",
+      "project": "spotify",
+      "section_no": 4,
+      "section": "Frontend Structure (Next.js)",
+      "subsection": "Authenticated app",
+      "page": 3,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[4. Frontend Structure (Next.js) > Creator portal]\n- /creator/dashboard\n- /creator/uploads\n- /creator/analytics",
+    "metadata": {
+      "chunk_id": "spotify-s04-03",
+      "project": "spotify",
+      "section_no": 4,
+      "section": "Frontend Structure (Next.js)",
+      "subsection": "Creator portal",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[4. Frontend Structure (Next.js) > Admin]\n- /admin                      → Admin dashboard.\n- /admin/users\n- /admin/content\n- /admin/flags",
+    "metadata": {
+      "chunk_id": "spotify-s04-04",
+      "project": "spotify",
+      "section_no": 4,
+      "section": "Frontend Structure (Next.js)",
+      "subsection": "Admin",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[4. Frontend Structure (Next.js) > Global UI components]\n- Persistent bottom player bar.\n- Left navigation (Home, Search, Your Library).\n- Top bar with search, profile dropdown.\n- Queue / Now Playing side panel.",
+    "metadata": {
+      "chunk_id": "spotify-s04-05",
+      "project": "spotify",
+      "section_no": 4,
+      "section": "Frontend Structure (Next.js)",
+      "subsection": "Global UI components",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > A. User & Auth]\n- Email/password auth & social login.\n- Email verification & password reset.\n- Profile editing (name, avatar).\n- Preferences: explicit content, language, theme.\n- Device management and sign-out from all devices.",
+    "metadata": {
+      "chunk_id": "spotify-s05-01",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "A. User & Auth",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > B. Playback & Player]\n- Play, pause, next, previous, seek.\n- Shuffle & repeat (track, playlist/album).\n- Volume & mute.\n- Playback queue with reorder & removal.\n- Cross-device control and sync.\n- Optional crossfade/gapless playback.\n- Auto-play recommendations when playlist ends.",
+    "metadata": {
+      "chunk_id": "spotify-s05-02",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "B. Playback & Player",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > C. Library & Playlists]\n- Liked songs collection.\n- Create/edit/delete playlists.\n- Public/private/unlisted playlists.\n- Collaborative playlists.\n- Save albums to library.\n- Follow artists and playlists.\n- Sorting and filtering in library.",
+    "metadata": {
+      "chunk_id": "spotify-s05-03",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "C. Library & Playlists",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > D. Catalog & Browsing]\n- Detailed artist pages (top songs, albums, related artists).\n- Album pages (track list, total duration).\n- Browse by genres & moods.\n- New releases and charts.\n- Podcasts & episodes (optional if you want full parity).",
+    "metadata": {
+      "chunk_id": "spotify-s05-04",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "D. Catalog & Browsing",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > E. Search]\n- Unified search (tracks, artists, albums, playlists, podcasts).\n- Autocomplete suggestions.\n- Search history and clear history.\n- Filter by content type.",
+    "metadata": {
+      "chunk_id": "spotify-s05-05",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "E. Search",
+      "page": 4,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > F. Recommendations & Discovery]\n- Personalized home feed.\n- “Because you listened to X” rows.\n- Song Radio and Artist Radio.\n- Auto-generated Daily Mix-style playlists.\n- Weekly discovery playlist (like Discover Weekly).",
+    "metadata": {
+      "chunk_id": "spotify-s05-06",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "F. Recommendations & Discovery",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > G. Social]\n- Follow users (friends).\n- Friend activity feed.\n- Collaborative playlists with multiple editors.\n- Share links for tracks, albums, artists, and playlists.\n- Optional embeddable mini-player for shared content.",
+    "metadata": {
+      "chunk_id": "spotify-s05-07",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "G. Social",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > H. Subscription / Monetization]\n- Free tier (ad-supported with lower bitrate).\n- Premium tier (ad-free, high bitrate, offline for native apps).\n- Payment integration (Stripe/Razorpay/etc.).\n- Plan change flows, cancellations, proration behavior.\n- Billing history and invoices.",
+    "metadata": {
+      "chunk_id": "spotify-s05-08",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "H. Subscription / Monetization",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > I. Ads (Free Tier)]\n- Audio ad slots between tracks.\n- Targeting rules (location, device, time).\n- Frequency capping and rotation.\n- Campaign analytics (impressions, clicks, conversions).",
+    "metadata": {
+      "chunk_id": "spotify-s05-09",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "I. Ads (Free Tier)",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > J. Creator / Label Portal]\n- Artist/label onboarding and verification.\n- Track and album upload flows.\n- Metadata management (ISRC, lyrics, credits).\n- Bulk uploads for labels.\n- Analytics dashboard (streams, listeners, countries, playlists).",
+    "metadata": {
+      "chunk_id": "spotify-s05-10",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "J. Creator / Label Portal",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > K. Admin / Moderation]\n- Search / inspect users and content.\n- Ban/suspend accounts.\n- Takedown and restore content.\n- Abuse reports queue and resolution tools.\n- Feature flags and A/B tests configuration.\n- System status and error monitoring dashboards.",
+    "metadata": {
+      "chunk_id": "spotify-s05-11",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "K. Admin / Moderation",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > L. Analytics & Reporting]\n- Event tracking for plays, skips, completes, likes, searches, shares.\n- DAU/MAU, retention cohorts, time spent listening.\n- Track- and playlist-level performance analytics.\n- Creator- and label-facing analytics.\n- Internal dashboards for product and ops teams.",
+    "metadata": {
+      "chunk_id": "spotify-s05-12",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "L. Analytics & Reporting",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[5. Feature Checklist (Spotify-like) > M. Security & Compliance]\n- HTTPS everywhere, secure cookies, HSTS.\n- Input validation and rate limiting at the gateway.\n- RBAC for admin and internal tools.\n- GDPR-style data export and account deletion.\n- Audit logging for sensitive actions.",
+    "metadata": {
+      "chunk_id": "spotify-s05-13",
+      "project": "spotify",
+      "section_no": 5,
+      "section": "Feature Checklist (Spotify-like)",
+      "subsection": "M. Security & Compliance",
+      "page": 5,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  },
+  {
+    "page_content": "[99. Document Summary > Summary]\nThis document summarizes the architecture, core services, data layout, frontend structure, and\nfeature checklist required to build a large-scale Spotify-like web application capable of\nserving 100,000+ daily users.",
+    "metadata": {
+      "chunk_id": "spotify-s99-01",
+      "project": "spotify",
+      "section_no": 99,
+      "section": "Document Summary",
+      "subsection": "Summary",
+      "page": 6,
+      "source": "spotify_web_app_architecture.pdf"
+    }
+  }
+]

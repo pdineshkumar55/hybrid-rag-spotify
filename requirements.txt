@@ -1,0 +1,22 @@
+# LLM + LangChain
+langchain-core
+langchain-openai
+langchain-text-splitters
+
+# Stores
+faiss-cpu
+numpy
+neo4j
+
+# PDF
+pypdf
+
+# API + UI
+fastapi
+uvicorn[standard]
+streamlit
+requests
+
+# Config
+python-dotenv
+pydantic-settings

@@ -1,0 +1,49 @@
+"""Step 8a — Generate a cited answer from the hybrid context."""
+import re
+from functools import lru_cache
+
+from langchain_openai import ChatOpenAI
+
+from app.config import get_settings
+
+NO_ANSWER = "The document doesn't contain information to answer this question."
+
+ANSWER_SYSTEM = """You are an assistant that answers questions about a software
+architecture document for a Spotify-like web app.
+
+Rules:
+- Use ONLY the context below: document passages [C#], knowledge graph facts [F#]
+  and entity summaries [E#]. Do not use outside knowledge.
+- After every sentence or bullet, cite the labels that support it, e.g. [C1][F3].
+- Prefer passages [C#] for descriptions and facts [F#] for relationships
+  (which service owns which table, what notifies what, etc.).
+- Facts marked "inferred" were derived by the system, not stated in the document;
+  if you rely on one, say "likely" or "the design suggests".
+- If the context does not answer the question, reply exactly:
+  "{no_answer}"
+- Be concise. Use short bullets for lists or flows."""
+
+
+@lru_cache
+def get_chat_llm() -> ChatOpenAI:
+    s = get_settings()
+    return ChatOpenAI(model=s.openai_chat_model, api_key=s.openai_api_key, temperature=0)
+
+
+def generate_answer(question: str, context: str, llm=None) -> str:
+    if not context.strip():
+        return NO_ANSWER
+    llm = llm or get_chat_llm()
+    msg = llm.invoke([
+        ("system", ANSWER_SYSTEM.format(no_answer=NO_ANSWER)),
+        ("human", f"Context:\n{context}\n\nQuestion: {question}"),
+    ])
+    return msg.content.strip()
+
+
+CITATION_RE = re.compile(r"\[([CFE]\d+)\]")
+
+
+def extract_citations(text: str) -> list[str]:
+    """Labels like C1, F3, E2 used in a text, in order of first use."""
+    return list(dict.fromkeys(CITATION_RE.findall(text)))
