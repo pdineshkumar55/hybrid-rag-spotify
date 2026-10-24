@@ -23,12 +23,13 @@ STOPWORDS = {
     "our", "there", "any", "has", "have", "handle", "handles", "handled",
 }
 
+KEYWORD_SEED_WEIGHT = 0.6  # expansion keywords count less than the question itself
 MAX_FACTS_PER_SEED = 8       # hop-1 facts kept per seed entity
 MAX_FACTS_PER_HOP2_NODE = 4  # hop-2 facts kept per intermediate node
 
 # Relationship types worth following on the 2nd hop
 HOP2_TYPES = ["OWNS_TABLE", "USES", "INTEGRATES_WITH", "NOTIFIES", "FEEDS",
-              "AGGREGATES", "LOGS_EVENTS_TO", "PUBLISHES", "CONSUMES"]
+              "AGGREGATES", "LOGS_EVENTS_TO", "PUBLISHES", "CONSUMES", "CARRIES"]
 
 
 # ---------------------------------------------------------------- linking
@@ -180,13 +181,21 @@ def expand(seeds: dict[str, float], max_facts: int = 40) -> tuple[list[dict], li
 
 
 # ---------------------------------------------------------------- public API
-def graph_search(question: str, chunk_ids: list[str] | None = None, max_facts: int = 40) -> dict:
+def graph_search(question: str, chunk_ids: list[str] | None = None, max_facts: int = 40,
+                 keywords: list[str] | None = None) -> dict:
     """Graph context for a question.
 
     chunk_ids: FAISS chunk IDs for the same question (optional) — their entities
                become extra seeds, which links the two retrievers together.
+    keywords:  extra search terms from query expansion (document vocabulary).
     """
+    # The user's own words get full weight; expansion keywords are searched
+    # separately at a lower weight, so they add seeds without pushing out the
+    # entities the question actually names (e.g. the "devices" table).
     seeds = link_by_fulltext(question)
+    if keywords:
+        for uid, score in link_by_fulltext(" ".join(keywords)).items():
+            seeds[uid] = max(seeds.get(uid, 0), round(score * KEYWORD_SEED_WEIGHT, 3))
     for uid, score in link_by_chunks(chunk_ids or []).items():
         seeds[uid] = max(seeds.get(uid, 0), score)
     entities, facts = expand(seeds, max_facts=max_facts)

@@ -22,7 +22,7 @@ NodeLabel = Literal[
 RelType = Literal[
     "BELONGS_TO", "OWNS_TABLE", "USES", "INTEGRATES_WITH", "NOTIFIES", "FEEDS",
     "AGGREGATES", "LOGS_EVENTS_TO", "STORES", "PART_OF", "IN_GROUP",
-    "IMPLEMENTED_BY", "SERVED_BY", "PUBLISHES", "CONSUMES",
+    "IMPLEMENTED_BY", "SERVED_BY", "PUBLISHES", "CONSUMES", "CARRIES",
 ]
 
 # Allowed (source label, target label) pairs for each relationship type
@@ -42,6 +42,7 @@ REL_RULES: dict[str, set[tuple[str, str]]] = {
     "SERVED_BY":       {("Page", "Service")},
     "PUBLISHES":       {("Service", "Event")},
     "CONSUMES":        {("Service", "Event")},
+    "CARRIES":         {("Technology", "Event")},   # message queue -> event it transports
 }
 
 

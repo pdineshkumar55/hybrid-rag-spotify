@@ -19,8 +19,11 @@ Rules:
   (which service owns which table, what notifies what, etc.).
 - Facts marked "inferred" were derived by the system, not stated in the document;
   if you rely on one, say "likely" or "the design suggests".
-- If the context does not answer the question, reply exactly:
+- If NOTHING in the context answers the question, reply exactly:
   "{no_answer}"
+  If the context answers it even partly, answer what you can and never add that sentence.
+- When a passage lists specific items (tables, events, routes, technologies),
+  include every item it lists rather than summarising them away.
 - Be concise. Use short bullets for lists or flows."""
 
 
@@ -38,7 +41,11 @@ def generate_answer(question: str, context: str, llm=None) -> str:
         ("system", ANSWER_SYSTEM.format(no_answer=NO_ANSWER)),
         ("human", f"Context:\n{context}\n\nQuestion: {question}"),
     ])
-    return msg.content.strip()
+    text = msg.content.strip()
+    # Safety net: drop the refusal sentence if the model appended it to a real answer
+    if NO_ANSWER in text and text != NO_ANSWER:
+        text = text.replace(NO_ANSWER, "").strip()
+    return text
 
 
 CITATION_RE = re.compile(r"\[([CFE]\d+)\]")

@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     neo4j_database: str = ""  # empty = the user's home database (on Aura: the instance ID)
 
     faiss_index_dir: str = "vectorstore"
+
+    # Rewrite the question into document vocabulary before searching (1 extra small LLM call)
+    query_expansion: bool = True
+
     pdf_path: str = "data/raw/spotify_web_app_architecture.pdf"
     api_base_url: str = "http://localhost:8000"
 

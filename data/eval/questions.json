@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "notes": "Evaluation set for the Spotify architecture PDF. expected_chunks: chunks that hold the answer. must_mention: each inner list is one key point; any of its alternatives counts (case-insensitive). expected_facts: [source contains, REL, target contains] that the graph should return.",
+  "questions": [
+    {
+      "id": "q01", "type": "descriptive",
+      "question": "What does the Media Processor Service do?",
+      "expected_chunks": ["spotify-s02-14"],
+      "must_mention": [["transcod"], ["ffmpeg"], ["hls"], ["waveform", "loudness"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q02", "type": "multi_hop",
+      "question": "What happens after an artist uploads a track?",
+      "expected_chunks": ["spotify-s02-13", "spotify-s02-14"],
+      "must_mention": [["media processor"], ["transcod"], ["catalog"], ["streaming"]],
+      "expected_facts": [["Media Processor", "NOTIFIES", "Catalog"], ["Media Processor", "NOTIFIES", "Streaming"]]
+    },
+    {
+      "id": "q03", "type": "relational",
+      "question": "Which tables does the Library & Playlist Service own?",
+      "expected_chunks": ["spotify-s02-06"],
+      "must_mention": [["playlists"], ["playlist_tracks"], ["user_liked_tracks"], ["user_followed_artists"]],
+      "expected_facts": [["Library & Playlist", "OWNS_TABLE", "playlist_tracks"], ["Library & Playlist", "OWNS_TABLE", "user_liked_tracks"]]
+    },
+    {
+      "id": "q04", "type": "relational",
+      "question": "Which payment gateways does the Subscription & Billing Service integrate with?",
+      "expected_chunks": ["spotify-s02-11"],
+      "must_mention": [["stripe"], ["razorpay"]],
+      "expected_facts": [["Subscription & Billing", "INTEGRATES_WITH", "Stripe"], ["Subscription & Billing", "INTEGRATES_WITH", "Razorpay"]]
+    },
+    {
+      "id": "q05", "type": "descriptive",
+      "question": "Where are playback events stored for analytics?",
+      "expected_chunks": ["spotify-s03-04"],
+      "must_mention": [["clickhouse"]],
+      "expected_facts": [["ClickHouse", "STORES", "playback"]]
+    },
+    {
+      "id": "q06", "type": "multi_hop",
+      "question": "Which service feeds listening data to the recommendation engine?",
+      "expected_chunks": ["spotify-s02-15"],
+      "must_mention": [["analytics"]],
+      "expected_facts": [["Analytics", "FEEDS", "Recommendation"]]
+    },
+    {
+      "id": "q07", "type": "descriptive",
+      "question": "What is Redis used for in this architecture?",
+      "expected_chunks": ["spotify-s03-02"],
+      "must_mention": [["session"], ["cach"], ["rate limit"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q08", "type": "descriptive",
+      "question": "Which technologies are used on the frontend?",
+      "expected_chunks": ["spotify-s01-01"],
+      "must_mention": [["next.js", "nextjs"], ["tailwind"], ["react query", "tanstack"], ["hls.js"]],
+      "expected_facts": [["Next.js", "BELONGS_TO", "Frontend"]]
+    },
+    {
+      "id": "q09", "type": "relational",
+      "question": "Which message queues are used and which events flow through them?",
+      "expected_chunks": ["spotify-s03-06"],
+      "must_mention": [["kafka"], ["track_uploaded"], ["playback_event"], ["subscription_updated"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q10", "type": "descriptive",
+      "question": "Which pages are part of the creator portal?",
+      "expected_chunks": ["spotify-s04-03"],
+      "must_mention": [["/creator/dashboard"], ["/creator/uploads"], ["/creator/analytics"]],
+      "expected_facts": [["/creator/uploads", "IN_GROUP", "Creator portal"]]
+    },
+    {
+      "id": "q11", "type": "multi_hop",
+      "question": "What features are in the Ads (Free Tier) area and which service implements them?",
+      "expected_chunks": ["spotify-s05-09", "spotify-s02-12"],
+      "must_mention": [["ads service"], ["frequency cap"], ["targeting"]],
+      "expected_facts": [["Ads", "IMPLEMENTED_BY", "Ads Service"]]
+    },
+    {
+      "id": "q12", "type": "multi_hop",
+      "question": "Which services would be affected if the devices table became unavailable?",
+      "expected_chunks": ["spotify-s02-02", "spotify-s02-07"],
+      "must_mention": [["auth"], ["playback"]],
+      "expected_facts": [["Auth & Identity", "OWNS_TABLE", "devices"], ["Playback & Session", "OWNS_TABLE", "devices"]]
+    },
+    {
+      "id": "q13", "type": "descriptive",
+      "question": "Which observability tools does the platform use?",
+      "expected_chunks": ["spotify-s01-04"],
+      "must_mention": [["prometheus"], ["grafana"], ["opentelemetry"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q14", "type": "descriptive",
+      "question": "How many daily users is the architecture designed to serve?",
+      "expected_chunks": ["spotify-s99-01"],
+      "must_mention": [["100,000", "100000", "100k", "100 000"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q15", "type": "descriptive",
+      "question": "What security and compliance measures are included?",
+      "expected_chunks": ["spotify-s05-13"],
+      "must_mention": [["hsts", "https"], ["rbac"], ["gdpr"], ["audit"]],
+      "expected_facts": []
+    },
+    {
+      "id": "q16", "type": "out_of_scope",
+      "question": "What is the capital of France?",
+      "expected_chunks": [], "must_mention": [], "expected_facts": []
+    },
+    {
+      "id": "q17", "type": "out_of_scope",
+      "question": "What is the monthly price of the Premium plan?",
+      "expected_chunks": [], "must_mention": [], "expected_facts": []
+    }
+  ]
+}

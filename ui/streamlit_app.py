@@ -199,6 +199,12 @@ def render_result(result: dict):
                 st.markdown(f"{icon[c['status']]} {c['claim']} {cites}{note}")
 
     with tab_debug:
+        exp = result["retrieval"].get("expansion")
+        if exp and len(exp.get("queries", [])) > 1:
+            st.markdown("**Query expansion**")
+            st.caption("Searched as: " + " · ".join(f"“{q}”" for q in exp["queries"]))
+            if exp.get("keywords"):
+                st.caption("Keywords: " + ", ".join(exp["keywords"]))
         st.dataframe(pd.DataFrame(result["retrieval"]["chunks"]), hide_index=True,
                      width="stretch")
         st.caption(f"{result['retrieval']['fact_count']} facts · "

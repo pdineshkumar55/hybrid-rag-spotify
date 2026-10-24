@@ -11,8 +11,10 @@
 """
 from functools import lru_cache
 
+from app.config import get_settings
 from app.retrieval.graph_retriever import graph_search
-from app.retrieval.vector_retriever import get_vector_store, vector_search
+from app.retrieval.query_expansion import expand_query
+from app.retrieval.vector_retriever import get_vector_store, multi_vector_search, vector_search
 
 RRF_K = 10  # small corpus -> small k keeps the top ranks distinct
 
@@ -29,11 +31,23 @@ def _rrf(rank: int) -> float:
 
 def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
                     max_facts: int = 25, max_entities: int = 6) -> dict:
-    # 1. Vector search
-    vec = vector_search(question, k=k_vector)
+    # 0. Query expansion: rewrite the question into the document's vocabulary
+    expansion = {"queries": [question], "keywords": []}
+    if get_settings().query_expansion:
+        try:
+            expansion = expand_query(question)
+        except Exception as exc:  # noqa: BLE001  (never fail a question because of this step)
+            print(f"[query_expansion] skipped: {exc}")
 
-    # 2. Graph search, seeded by the question and by the vector hits
-    graph = graph_search(question, chunk_ids=[r["chunk_id"] for r in vec], max_facts=max_facts)
+    # 1. Vector search (every phrasing, merged with RRF)
+    if len(expansion["queries"]) > 1:
+        vec = multi_vector_search(expansion["queries"], k=k_vector)
+    else:
+        vec = vector_search(question, k=k_vector)
+
+    # 2. Graph search, seeded by the question, the expansion keywords and the vector hits
+    graph = graph_search(question, chunk_ids=[r["chunk_id"] for r in vec], max_facts=max_facts,
+                         keywords=expansion["keywords"])
     facts, entities = graph["facts"], graph["entities"][:max_entities]
 
     # 3. Graph votes for chunks: sum of the scores of facts that cite each chunk
@@ -78,6 +92,7 @@ def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
 
     return {
         "question": question,
+        "expansion": expansion,
         "chunks": chunks,
         "facts": facts,
         "entities": entities,

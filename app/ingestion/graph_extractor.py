@@ -32,7 +32,8 @@ Node labels:
   If a line lists alternatives with "/" (e.g. "Kafka/NATS/RabbitMQ"), create one Technology each.
 - Table: database table names exactly as written (snake_case), e.g. "playlist_tracks".
 - Event: message-queue events (e.g. "track_uploaded") or tracked user-event types
-  (e.g. "playback events", "skips"). Metrics such as "daily active users" are NOT events.
+  (e.g. "playback events", "skips"). Metrics such as "daily active users" and cache
+  contents such as "session cache" or "rate limits" are NOT events.
 - Page: a frontend route; name = the path, e.g. "/playlist/:id".
 - Feature: an individual checklist item (only in the Feature Checklist section).
 - Service, FeatureArea, Layer, PageGroup: FIXED lists below. Never invent new ones;
@@ -287,8 +288,24 @@ def extract_graph(docs: list[Document], llm=None, verbose: bool = True) -> dict:
             for uid in acc.mentions.get(cid, ()):
                 if acc.entities[uid]["label"] == member_label:
                     added += acc.link(uid, rel_type, heading_uid[cid], "explicit", cid)
+    # Section 3 ("Data Storage Layout"): the store named in the heading holds the
+    # tables/events listed under it, e.g. "Message Queue (Kafka/NATS/RabbitMQ)" -> events.
+    for d in docs:
+        cid, meta = d.metadata["chunk_id"], d.metadata
+        if meta["section_no"] != 3:
+            continue
+        heading = meta["subsection"]
+        rel_type = "CARRIES" if "queue" in heading.lower() else "STORES"
+        mentioned = [acc.entities[u] for u in acc.mentions.get(cid, ())]
+        stores = [e["uid"] for e in mentioned
+                  if e["label"] == "Technology" and in_text(e["name"], heading)]
+        members = [e["uid"] for e in mentioned
+                   if e["label"] in ("Event", "Table") and not (rel_type == "CARRIES" and e["label"] == "Table")]
+        for tech in stores:
+            for m in members:
+                added += acc.link(tech, rel_type, m, "explicit", cid)
     if verbose:
-        print(f"  structural edges   {added} (BELONGS_TO / IN_GROUP / PART_OF)")
+        print(f"  structural edges   {added} (BELONGS_TO / IN_GROUP / PART_OF / STORES / CARRIES)")
 
     # ---- Pass 3: cross-section links ----
     catalog_lines = []

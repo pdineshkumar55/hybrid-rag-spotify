@@ -74,7 +74,7 @@
       "uid": "service:library-playlist",
       "label": "Service",
       "name": "Library & Playlist Service",
-      "description": "Implements 'Your Library' (liked songs, saved albums, followed artists).",
+      "description": "Implements 'Your Library' (liked songs, saved albums, followed artists). Manages playlists (create, edit, delete, reorder, collaborative, privacy).",
       "aliases": []
     },
     {
@@ -98,14 +98,14 @@
       "uid": "service:recommendation-personalization",
       "label": "Service",
       "name": "Recommendation & Personalization Service",
-      "description": "Computes user and item embeddings using listening history and audio features.",
+      "description": "Feeds Recommendation Service with listening data.",
       "aliases": []
     },
     {
       "uid": "service:social-activity",
       "label": "Service",
       "name": "Social & Activity Service",
-      "description": "Following system between users.",
+      "description": "Social & Activity Service handles user interactions and activities.",
       "aliases": []
     },
     {
@@ -129,14 +129,14 @@
       "uid": "service:content-ingestion-creator-portal",
       "label": "Service",
       "name": "Content Ingestion & Creator Portal Service",
-      "description": "Service for uploading tracks, editing metadata, and managing catalogs.",
+      "description": "Artist/label portal: upload tracks, edit metadata, manage catalogs.",
       "aliases": []
     },
     {
       "uid": "service:media-processor",
       "label": "Service",
       "name": "Media Processor Service",
-      "description": "Background worker for transcoding uploads.",
+      "description": "Background worker for transcoding uploads (FFmpeg).",
       "aliases": []
     },
     {
@@ -310,7 +310,9 @@
       "label": "Technology",
       "name": "React Query",
       "description": "for server state.",
-      "aliases": []
+      "aliases": [
+        "TanStack Query"
+      ]
     },
     {
       "uid": "technology:zustand",
@@ -373,6 +375,13 @@
       "label": "Technology",
       "name": "PWA",
       "description": "features for installable app and offline caching of some metadata.",
+      "aliases": []
+    },
+    {
+      "uid": "page:root",
+      "label": "Page",
+      "name": "/",
+      "description": "Landing/marketing page.",
       "aliases": []
     },
     {
@@ -470,7 +479,7 @@
       "uid": "technology:redis",
       "label": "Technology",
       "name": "Redis",
-      "description": "Rate limits and hot metadata caches (trending playlists, top charts).",
+      "description": "A data structure store used as a database, cache, and message broker.",
       "aliases": []
     },
     {
@@ -498,19 +507,36 @@
       "uid": "technology:s3-compatible-object-storage",
       "label": "Technology",
       "name": "S3-compatible object storage",
-      "description": "for audio and images.",
+      "description": "Writes processed files to object storage and notifies Catalog/Streaming services.",
       "aliases": []
     },
     {
       "uid": "technology:cdn",
       "label": "Technology",
       "name": "CDN",
-      "description": "for asset and audio delivery.",
-      "aliases": [
-        "CloudFront",
-        "Fastly",
-        "Cloudflare"
-      ]
+      "description": "Content Delivery Network for distributing content.",
+      "aliases": []
+    },
+    {
+      "uid": "technology:cloudfront",
+      "label": "Technology",
+      "name": "CloudFront",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "uid": "technology:fastly",
+      "label": "Technology",
+      "name": "Fastly",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "uid": "technology:cloudflare",
+      "label": "Technology",
+      "name": "Cloudflare",
+      "description": "",
+      "aliases": []
     },
     {
       "uid": "technology:docker",
@@ -524,69 +550,47 @@
       "label": "Technology",
       "name": "Kubernetes",
       "description": "for orchestration.",
-      "aliases": []
-    },
-    {
-      "uid": "technology:gke",
-      "label": "Technology",
-      "name": "GKE",
-      "description": "",
-      "aliases": []
-    },
-    {
-      "uid": "technology:eks",
-      "label": "Technology",
-      "name": "EKS",
-      "description": "",
-      "aliases": []
-    },
-    {
-      "uid": "technology:aks",
-      "label": "Technology",
-      "name": "AKS",
-      "description": "",
-      "aliases": []
+      "aliases": [
+        "GKE",
+        "EKS",
+        "AKS"
+      ]
     },
     {
       "uid": "technology:vault",
       "label": "Technology",
       "name": "Vault",
       "description": "for secrets.",
-      "aliases": []
-    },
-    {
-      "uid": "technology:secrets-manager",
-      "label": "Technology",
-      "name": "Secrets Manager",
-      "description": "for secrets.",
-      "aliases": []
+      "aliases": [
+        "Secrets Manager"
+      ]
     },
     {
       "uid": "technology:github-actions",
       "label": "Technology",
       "name": "GitHub Actions",
-      "description": "via CI/CD.",
+      "description": "for CI/CD.",
       "aliases": []
     },
     {
       "uid": "technology:gitlab-ci",
       "label": "Technology",
       "name": "GitLab CI",
-      "description": "via CI/CD.",
+      "description": "for CI/CD.",
       "aliases": []
     },
     {
       "uid": "technology:prometheus",
       "label": "Technology",
       "name": "Prometheus",
-      "description": "via Observability.",
+      "description": "for observability.",
       "aliases": []
     },
     {
       "uid": "technology:grafana",
       "label": "Technology",
       "name": "Grafana",
-      "description": "via Observability.",
+      "description": "for observability.",
       "aliases": []
     },
     {
@@ -600,42 +604,42 @@
       "uid": "table:users",
       "label": "Table",
       "name": "users",
-      "description": "Core table for user data.",
+      "description": "Table for user data.",
       "aliases": []
     },
     {
       "uid": "table:credentials",
       "label": "Table",
       "name": "credentials",
-      "description": "Core table for user credentials.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:sessions",
       "label": "Table",
       "name": "sessions",
-      "description": "Core table for user sessions.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:devices",
       "label": "Table",
       "name": "devices",
-      "description": "Core tables for Playback & Session Service.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:user-profile",
       "label": "Table",
       "name": "user_profile",
-      "description": "Core tables: user_profile, user_settings.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:user-settings",
       "label": "Table",
       "name": "user_settings",
-      "description": "Core tables: user_profile, user_settings.",
+      "description": "",
       "aliases": []
     },
     {
@@ -684,63 +688,63 @@
       "uid": "table:playlists",
       "label": "Table",
       "name": "playlists",
-      "description": "Core table for managing playlists.",
+      "description": "Table for playlists.",
       "aliases": []
     },
     {
       "uid": "table:podcasts",
       "label": "Table",
       "name": "podcasts",
-      "description": "Core table for the service.",
+      "description": "Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
       "aliases": []
     },
     {
       "uid": "table:playlist-tracks",
       "label": "Table",
       "name": "playlist_tracks",
-      "description": "Core table for managing playlist tracks.",
+      "description": "Core table.",
       "aliases": []
     },
     {
       "uid": "table:user-liked-tracks",
       "label": "Table",
       "name": "user_liked_tracks",
-      "description": "Core table for managing user liked tracks.",
+      "description": "Core table.",
       "aliases": []
     },
     {
       "uid": "table:user-saved-albums",
       "label": "Table",
       "name": "user_saved_albums",
-      "description": "Core table for managing user saved albums.",
+      "description": "Core table.",
       "aliases": []
     },
     {
       "uid": "table:user-followed-artists",
       "label": "Table",
       "name": "user_followed_artists",
-      "description": "Core table for managing user followed artists.",
+      "description": "Core table.",
       "aliases": []
     },
     {
       "uid": "table:user-followed-playlists",
       "label": "Table",
       "name": "user_followed_playlists",
-      "description": "Core table for managing user followed playlists.",
+      "description": "Core table.",
       "aliases": []
     },
     {
       "uid": "table:playback-sessions",
       "label": "Table",
       "name": "playback_sessions",
-      "description": "Core tables for Playback & Session Service.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:playback-queue",
       "label": "Table",
       "name": "playback_queue",
-      "description": "Core tables for Playback & Session Service.",
+      "description": "",
       "aliases": []
     },
     {
@@ -803,76 +807,69 @@
       "uid": "table:ad-campaigns",
       "label": "Table",
       "name": "ad_campaigns",
-      "description": "Core tables: ad_campaigns, ad_creatives, ad_impressions, ad_events.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:ad-creatives",
       "label": "Table",
       "name": "ad_creatives",
-      "description": "Core tables: ad_campaigns, ad_creatives, ad_impressions, ad_events.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:ad-impressions",
       "label": "Table",
       "name": "ad_impressions",
-      "description": "Core tables: ad_campaigns, ad_creatives, ad_impressions, ad_events.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:ad-events",
       "label": "Table",
       "name": "ad_events",
-      "description": "Core tables: ad_campaigns, ad_creatives, ad_impressions, ad_events.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "table:uploads",
       "label": "Table",
       "name": "uploads",
-      "description": "Core table for the service.",
+      "description": "Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
       "aliases": []
     },
     {
       "uid": "table:rights",
       "label": "Table",
       "name": "rights",
-      "description": "Core table for the service.",
+      "description": "Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
       "aliases": []
     },
     {
       "uid": "table:creator-profiles",
       "label": "Table",
       "name": "creator_profiles",
-      "description": "Core table for the service.",
+      "description": "Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
       "aliases": []
     },
     {
       "uid": "table:episodes",
       "label": "Table",
       "name": "episodes",
-      "description": "Core table for the service.",
+      "description": "Core tables: uploads, rights, creator_profiles, podcasts, episodes.",
       "aliases": []
     },
     {
       "uid": "technology:ffmpeg",
       "label": "Technology",
       "name": "FFmpeg",
-      "description": "Background worker for transcoding uploads.",
+      "description": "Creates multiple bitrates and HLS manifests.",
       "aliases": []
     },
     {
-      "uid": "table:events",
-      "label": "Table",
-      "name": "events",
-      "description": "",
-      "aliases": []
-    },
-    {
-      "uid": "event:events",
+      "uid": "event:user-and-system-events",
       "label": "Event",
-      "name": "events",
+      "name": "user and system events",
       "description": "",
       "aliases": []
     },
@@ -893,21 +890,28 @@
     {
       "uid": "event:authentication-session-cache",
       "label": "Event",
-      "name": "authentication/session cache",
+      "name": "Authentication/session cache",
       "description": "",
       "aliases": []
     },
     {
       "uid": "event:playback-state-cache",
       "label": "Event",
-      "name": "playback state cache",
+      "name": "Playback state cache",
       "description": "",
       "aliases": []
     },
     {
-      "uid": "event:rate-limits-and-hot-metadata-caches",
+      "uid": "event:rate-limits",
       "label": "Event",
-      "name": "rate limits and hot metadata caches",
+      "name": "Rate limits",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "uid": "event:hot-metadata-caches",
+      "label": "Event",
+      "name": "hot metadata caches (trending playlists, top charts)",
       "description": "",
       "aliases": []
     },
@@ -915,21 +919,21 @@
       "uid": "event:playback-events",
       "label": "Event",
       "name": "playback events",
-      "description": "play, pause, skip, complete.",
+      "description": "Playback events (play, pause, skip, complete).",
       "aliases": []
     },
     {
       "uid": "event:search-events",
       "label": "Event",
-      "name": "Search events",
+      "name": "search events",
       "description": "Search events and clicks.",
       "aliases": []
     },
     {
-      "uid": "event:clicks",
+      "uid": "event:hls-segments-and-manifests-per-track-and-bitrate",
       "label": "Event",
-      "name": "clicks",
-      "description": "Search events and clicks.",
+      "name": "HLS segments and manifests per track and bitrate",
+      "description": "",
       "aliases": []
     },
     {
@@ -965,13 +969,6 @@
       "label": "Event",
       "name": "notification events",
       "description": "",
-      "aliases": []
-    },
-    {
-      "uid": "page:root",
-      "label": "Page",
-      "name": "/",
-      "description": "Landing/marketing page.",
       "aliases": []
     },
     {
@@ -1131,35 +1128,35 @@
     {
       "uid": "feature:email-password-auth-social-login",
       "label": "Feature",
-      "name": "Email/password auth & social login",
+      "name": "Email/password auth & social login.",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:email-verification-password-reset",
       "label": "Feature",
-      "name": "Email verification & password reset",
+      "name": "Email verification & password reset.",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:profile-editing",
       "label": "Feature",
-      "name": "Profile editing (name, avatar)",
+      "name": "Profile editing (name, avatar).",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:preferences-explicit-content-language-theme",
       "label": "Feature",
-      "name": "Preferences: explicit content, language, theme",
+      "name": "Preferences: explicit content, language, theme.",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:device-management-and-sign-out-from-all-devices",
       "label": "Feature",
-      "name": "Device management and sign-out from all devices",
+      "name": "Device management and sign-out from all devices.",
       "description": "",
       "aliases": []
     },
@@ -1362,35 +1359,35 @@
     {
       "uid": "feature:follow-users",
       "label": "Feature",
-      "name": "Follow users (friends).",
+      "name": "Follow users (friends)",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:friend-activity-feed",
       "label": "Feature",
-      "name": "Friend activity feed.",
+      "name": "Friend activity feed",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:collaborative-playlists-with-multiple-editors",
       "label": "Feature",
-      "name": "Collaborative playlists with multiple editors.",
+      "name": "Collaborative playlists with multiple editors",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:share-links-for-tracks-albums-artists-and-playlists",
       "label": "Feature",
-      "name": "Share links for tracks, albums, artists, and playlists.",
+      "name": "Share links for tracks, albums, artists, and playlists",
       "description": "",
       "aliases": []
     },
     {
       "uid": "feature:optional-embeddable-mini-player-for-shared-content",
       "label": "Feature",
-      "name": "Optional embeddable mini-player for shared content.",
+      "name": "Optional embeddable mini-player for shared content",
       "description": "",
       "aliases": []
     },
@@ -1538,69 +1535,62 @@
       "uid": "event:plays",
       "label": "Event",
       "name": "plays",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "event:skips",
       "label": "Event",
       "name": "skips",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "event:completes",
       "label": "Event",
       "name": "completes",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "event:likes",
       "label": "Event",
       "name": "likes",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "event:searches",
       "label": "Event",
       "name": "searches",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "event:shares",
       "label": "Event",
       "name": "shares",
-      "description": "One short sentence from the text; empty string if none",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "feature:track-and-playlist-level-performance-analytics",
       "label": "Feature",
-      "name": "Track- and playlist-level performance analytics",
-      "description": "One short sentence from the text; empty string if none",
+      "name": "Track- and playlist-level performance analytics.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "feature:creator-and-label-facing-analytics",
       "label": "Feature",
-      "name": "Creator- and label-facing analytics",
-      "description": "One short sentence from the text; empty string if none",
+      "name": "Creator- and label-facing analytics.",
+      "description": "",
       "aliases": []
     },
     {
       "uid": "feature:internal-dashboards-for-product-and-ops-teams",
       "label": "Feature",
-      "name": "Internal dashboards for product and ops teams",
-      "description": "One short sentence from the text; empty string if none",
-      "aliases": []
-    },
-    {
-      "uid": "technology:event-tracking",
-      "label": "Technology",
-      "name": "Event tracking",
+      "name": "Internal dashboards for product and ops teams.",
       "description": "",
       "aliases": []
     },
@@ -1642,109 +1632,10 @@
   ],
   "relations": [
     {
-      "source": "technology:next-js",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:tailwind-css",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:react-query",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:zustand",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:recoil",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:jotai",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:hls-js",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:html5-audio",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:web-audio-api",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:oauth2",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:oidc",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-01"
-      ]
-    },
-    {
-      "source": "technology:pwa",
-      "type": "BELONGS_TO",
-      "target": "layer:frontend",
-      "evidence": "explicit",
+      "source": "page:root",
+      "type": "SERVED_BY",
+      "target": "service:api-gateway-backend-for-frontend",
+      "evidence": "inferred",
       "chunk_ids": [
         "spotify-s01-01"
       ]
@@ -1899,8 +1790,7 @@
       "target": "layer:databases-storage",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s01-03",
-        "spotify-s03-04"
+        "spotify-s01-03"
       ]
     },
     {
@@ -1914,6 +1804,33 @@
     },
     {
       "source": "technology:cdn",
+      "type": "BELONGS_TO",
+      "target": "layer:databases-storage",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-03"
+      ]
+    },
+    {
+      "source": "technology:cloudfront",
+      "type": "BELONGS_TO",
+      "target": "layer:databases-storage",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-03"
+      ]
+    },
+    {
+      "source": "technology:fastly",
+      "type": "BELONGS_TO",
+      "target": "layer:databases-storage",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-03"
+      ]
+    },
+    {
+      "source": "technology:cloudflare",
       "type": "BELONGS_TO",
       "target": "layer:databases-storage",
       "evidence": "explicit",
@@ -1940,43 +1857,7 @@
       ]
     },
     {
-      "source": "technology:gke",
-      "type": "BELONGS_TO",
-      "target": "layer:infrastructure-devops",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-04"
-      ]
-    },
-    {
-      "source": "technology:eks",
-      "type": "BELONGS_TO",
-      "target": "layer:infrastructure-devops",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-04"
-      ]
-    },
-    {
-      "source": "technology:aks",
-      "type": "BELONGS_TO",
-      "target": "layer:infrastructure-devops",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-04"
-      ]
-    },
-    {
       "source": "technology:vault",
-      "type": "BELONGS_TO",
-      "target": "layer:infrastructure-devops",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s01-04"
-      ]
-    },
-    {
-      "source": "technology:secrets-manager",
       "type": "BELONGS_TO",
       "target": "layer:infrastructure-devops",
       "evidence": "explicit",
@@ -2140,15 +2021,6 @@
     {
       "source": "service:search-discovery-index",
       "type": "OWNS_TABLE",
-      "target": "table:tracks",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05"
-      ]
-    },
-    {
-      "source": "service:search-discovery-index",
-      "type": "OWNS_TABLE",
       "target": "table:albums",
       "evidence": "explicit",
       "chunk_ids": [
@@ -2183,103 +2055,30 @@
       ]
     },
     {
-      "source": "technology:elasticsearch",
-      "type": "STORES",
+      "source": "service:search-discovery-index",
+      "type": "OWNS_TABLE",
       "target": "table:tracks",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
+        "spotify-s02-05"
       ]
     },
     {
-      "source": "technology:elasticsearch",
-      "type": "STORES",
-      "target": "table:albums",
+      "source": "service:search-discovery-index",
+      "type": "INTEGRATES_WITH",
+      "target": "technology:elasticsearch",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
+        "spotify-s02-05"
       ]
     },
     {
-      "source": "technology:elasticsearch",
-      "type": "STORES",
-      "target": "table:artists",
+      "source": "service:search-discovery-index",
+      "type": "INTEGRATES_WITH",
+      "target": "technology:opensearch",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:elasticsearch",
-      "type": "STORES",
-      "target": "table:playlists",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:elasticsearch",
-      "type": "STORES",
-      "target": "table:podcasts",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:opensearch",
-      "type": "STORES",
-      "target": "table:tracks",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:opensearch",
-      "type": "STORES",
-      "target": "table:albums",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:opensearch",
-      "type": "STORES",
-      "target": "table:artists",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:opensearch",
-      "type": "STORES",
-      "target": "table:playlists",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
-      ]
-    },
-    {
-      "source": "technology:opensearch",
-      "type": "STORES",
-      "target": "table:podcasts",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s02-05",
-        "spotify-s03-03"
+        "spotify-s02-05"
       ]
     },
     {
@@ -2361,6 +2160,15 @@
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s02-07"
+      ]
+    },
+    {
+      "source": "service:streaming-media-delivery",
+      "type": "LOGS_EVENTS_TO",
+      "target": "service:analytics-events",
+      "evidence": "inferred",
+      "chunk_ids": [
+        "spotify-s02-08"
       ]
     },
     {
@@ -2508,18 +2316,54 @@
       ]
     },
     {
-      "source": "service:analytics-events",
-      "type": "OWNS_TABLE",
-      "target": "table:events",
+      "source": "service:media-processor",
+      "type": "NOTIFIES",
+      "target": "service:catalog",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s02-14"
+      ]
+    },
+    {
+      "source": "service:media-processor",
+      "type": "NOTIFIES",
+      "target": "service:streaming-media-delivery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s02-14"
+      ]
+    },
+    {
+      "source": "service:media-processor",
+      "type": "USES",
+      "target": "technology:ffmpeg",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s02-14"
+      ]
+    },
+    {
+      "source": "service:media-processor",
+      "type": "USES",
+      "target": "technology:s3-compatible-object-storage",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s02-14"
+      ]
+    },
+    {
+      "source": "technology:clickhouse",
+      "type": "STORES",
+      "target": "event:user-and-system-events",
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s02-15"
       ]
     },
     {
-      "source": "technology:clickhouse",
-      "type": "STORES",
-      "target": "event:events",
+      "source": "service:analytics-events",
+      "type": "FEEDS",
+      "target": "service:recommendation-personalization",
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s02-15"
@@ -2618,7 +2462,16 @@
     {
       "source": "technology:redis",
       "type": "STORES",
-      "target": "event:rate-limits-and-hot-metadata-caches",
+      "target": "event:rate-limits",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-02"
+      ]
+    },
+    {
+      "source": "technology:redis",
+      "type": "STORES",
+      "target": "event:hot-metadata-caches",
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s03-02"
@@ -2643,18 +2496,9 @@
       ]
     },
     {
-      "source": "technology:clickhouse",
-      "type": "STORES",
-      "target": "event:clicks",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s03-04"
-      ]
-    },
-    {
       "source": "technology:s3-compatible-object-storage",
       "type": "STORES",
-      "target": "table:episodes",
+      "target": "table:podcasts",
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s03-05"
@@ -2662,92 +2506,191 @@
     },
     {
       "source": "technology:cdn",
-      "type": "STORES",
-      "target": "table:episodes",
-      "evidence": "explicit",
+      "type": "CARRIES",
+      "target": "event:hls-segments-and-manifests-per-track-and-bitrate",
+      "evidence": "inferred",
       "chunk_ids": [
         "spotify-s03-05"
       ]
     },
     {
-      "source": "page:root",
-      "type": "IN_GROUP",
-      "target": "pagegroup:public",
+      "source": "technology:kafka",
+      "type": "CARRIES",
+      "target": "event:track-uploaded",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-01"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:login",
-      "type": "IN_GROUP",
-      "target": "pagegroup:public",
+      "source": "technology:kafka",
+      "type": "CARRIES",
+      "target": "event:track-encoded",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-01"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:signup",
-      "type": "IN_GROUP",
-      "target": "pagegroup:public",
+      "source": "technology:kafka",
+      "type": "CARRIES",
+      "target": "event:playback-event",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-01"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:artist-id",
-      "type": "IN_GROUP",
-      "target": "pagegroup:public",
+      "source": "technology:kafka",
+      "type": "CARRIES",
+      "target": "event:subscription-updated",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-01"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:album-id",
-      "type": "IN_GROUP",
-      "target": "pagegroup:public",
+      "source": "technology:kafka",
+      "type": "CARRIES",
+      "target": "event:notification-events",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-01"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:admin",
-      "type": "IN_GROUP",
-      "target": "pagegroup:admin",
+      "source": "technology:nats",
+      "type": "CARRIES",
+      "target": "event:track-uploaded",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-04"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:admin-users",
-      "type": "IN_GROUP",
-      "target": "pagegroup:admin",
+      "source": "technology:nats",
+      "type": "CARRIES",
+      "target": "event:track-encoded",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-04"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:admin-content",
-      "type": "IN_GROUP",
-      "target": "pagegroup:admin",
+      "source": "technology:nats",
+      "type": "CARRIES",
+      "target": "event:playback-event",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-04"
+        "spotify-s03-06"
       ]
     },
     {
-      "source": "page:admin-flags",
-      "type": "IN_GROUP",
-      "target": "pagegroup:admin",
+      "source": "technology:nats",
+      "type": "CARRIES",
+      "target": "event:subscription-updated",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s04-04"
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:nats",
+      "type": "CARRIES",
+      "target": "event:notification-events",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:rabbitmq",
+      "type": "CARRIES",
+      "target": "event:track-uploaded",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:rabbitmq",
+      "type": "CARRIES",
+      "target": "event:track-encoded",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:rabbitmq",
+      "type": "CARRIES",
+      "target": "event:playback-event",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:rabbitmq",
+      "type": "CARRIES",
+      "target": "event:subscription-updated",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "technology:rabbitmq",
+      "type": "CARRIES",
+      "target": "event:notification-events",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-06"
+      ]
+    },
+    {
+      "source": "feature:email-password-auth-social-login",
+      "type": "PART_OF",
+      "target": "featurearea:user-auth",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-01"
+      ]
+    },
+    {
+      "source": "feature:email-verification-password-reset",
+      "type": "PART_OF",
+      "target": "featurearea:user-auth",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-01"
+      ]
+    },
+    {
+      "source": "feature:profile-editing",
+      "type": "PART_OF",
+      "target": "featurearea:user-auth",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-01"
+      ]
+    },
+    {
+      "source": "feature:preferences-explicit-content-language-theme",
+      "type": "PART_OF",
+      "target": "featurearea:user-auth",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-01"
+      ]
+    },
+    {
+      "source": "feature:device-management-and-sign-out-from-all-devices",
+      "type": "PART_OF",
+      "target": "featurearea:user-auth",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-01"
       ]
     },
     {
@@ -2877,93 +2820,129 @@
       ]
     },
     {
-      "source": "feature:detailed-artist-pages",
+      "source": "feature:follow-users",
       "type": "PART_OF",
-      "target": "featurearea:catalog-browsing",
+      "target": "featurearea:social",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-04"
+        "spotify-s05-07"
       ]
     },
     {
-      "source": "feature:album-pages",
+      "source": "feature:friend-activity-feed",
       "type": "PART_OF",
-      "target": "featurearea:catalog-browsing",
+      "target": "featurearea:social",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-04"
+        "spotify-s05-07"
       ]
     },
     {
-      "source": "feature:browse-by-genres-moods",
+      "source": "feature:collaborative-playlists-with-multiple-editors",
       "type": "PART_OF",
-      "target": "featurearea:catalog-browsing",
+      "target": "featurearea:social",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-04"
+        "spotify-s05-07"
       ]
     },
     {
-      "source": "feature:new-releases-and-charts",
+      "source": "feature:share-links-for-tracks-albums-artists-and-playlists",
       "type": "PART_OF",
-      "target": "featurearea:catalog-browsing",
+      "target": "featurearea:social",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-04"
+        "spotify-s05-07"
       ]
     },
     {
-      "source": "feature:podcasts-episodes",
+      "source": "feature:optional-embeddable-mini-player-for-shared-content",
       "type": "PART_OF",
-      "target": "featurearea:catalog-browsing",
+      "target": "featurearea:social",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-04"
+        "spotify-s05-07"
       ]
     },
     {
-      "source": "feature:personalized-home-feed",
+      "source": "feature:audio-ad-slots-between-tracks",
       "type": "PART_OF",
-      "target": "featurearea:recommendations-discovery",
+      "target": "featurearea:ads",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-06"
+        "spotify-s05-09"
       ]
     },
     {
-      "source": "feature:because-you-listened-to-x-rows",
+      "source": "feature:targeting-rules",
       "type": "PART_OF",
-      "target": "featurearea:recommendations-discovery",
+      "target": "featurearea:ads",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-06"
+        "spotify-s05-09"
       ]
     },
     {
-      "source": "feature:song-radio-and-artist-radio",
+      "source": "feature:frequency-capping-and-rotation",
       "type": "PART_OF",
-      "target": "featurearea:recommendations-discovery",
+      "target": "featurearea:ads",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-06"
+        "spotify-s05-09"
       ]
     },
     {
-      "source": "feature:auto-generated-daily-mix-style-playlists",
+      "source": "feature:campaign-analytics",
       "type": "PART_OF",
-      "target": "featurearea:recommendations-discovery",
+      "target": "featurearea:ads",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-06"
+        "spotify-s05-09"
       ]
     },
     {
-      "source": "feature:weekly-discovery-playlist",
+      "source": "feature:artist-label-onboarding-and-verification",
       "type": "PART_OF",
-      "target": "featurearea:recommendations-discovery",
+      "target": "featurearea:creator-label-portal",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-06"
+        "spotify-s05-10"
+      ]
+    },
+    {
+      "source": "feature:track-and-album-upload-flows",
+      "type": "PART_OF",
+      "target": "featurearea:creator-label-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-10"
+      ]
+    },
+    {
+      "source": "feature:metadata-management",
+      "type": "PART_OF",
+      "target": "featurearea:creator-label-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-10"
+      ]
+    },
+    {
+      "source": "feature:bulk-uploads-for-labels",
+      "type": "PART_OF",
+      "target": "featurearea:creator-label-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-10"
+      ]
+    },
+    {
+      "source": "feature:analytics-dashboard",
+      "type": "PART_OF",
+      "target": "featurearea:creator-label-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-10"
       ]
     },
     {
@@ -3021,435 +3000,12 @@
       ]
     },
     {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:plays",
+      "source": "feature:track-and-playlist-level-performance-analytics",
+      "type": "PART_OF",
+      "target": "featurearea:analytics-reporting",
       "evidence": "explicit",
       "chunk_ids": [
         "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:skips",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:completes",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:likes",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:searches",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "technology:event-tracking",
-      "type": "STORES",
-      "target": "event:shares",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-12"
-      ]
-    },
-    {
-      "source": "page:collection-artists",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:settings-account",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:home",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:search",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:settings-privacy",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:collection-playlists",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:playlist-id",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:collection-tracks",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:collection-albums",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:settings-subscription",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:queue",
-      "type": "IN_GROUP",
-      "target": "pagegroup:authenticated-app",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-02"
-      ]
-    },
-    {
-      "source": "page:creator-uploads",
-      "type": "IN_GROUP",
-      "target": "pagegroup:creator-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-03"
-      ]
-    },
-    {
-      "source": "page:creator-analytics",
-      "type": "IN_GROUP",
-      "target": "pagegroup:creator-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-03"
-      ]
-    },
-    {
-      "source": "page:creator-dashboard",
-      "type": "IN_GROUP",
-      "target": "pagegroup:creator-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s04-03"
-      ]
-    },
-    {
-      "source": "feature:preferences-explicit-content-language-theme",
-      "type": "PART_OF",
-      "target": "featurearea:user-auth",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-01"
-      ]
-    },
-    {
-      "source": "feature:device-management-and-sign-out-from-all-devices",
-      "type": "PART_OF",
-      "target": "featurearea:user-auth",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-01"
-      ]
-    },
-    {
-      "source": "feature:profile-editing",
-      "type": "PART_OF",
-      "target": "featurearea:user-auth",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-01"
-      ]
-    },
-    {
-      "source": "feature:email-verification-password-reset",
-      "type": "PART_OF",
-      "target": "featurearea:user-auth",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-01"
-      ]
-    },
-    {
-      "source": "feature:email-password-auth-social-login",
-      "type": "PART_OF",
-      "target": "featurearea:user-auth",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-01"
-      ]
-    },
-    {
-      "source": "feature:unified-search",
-      "type": "PART_OF",
-      "target": "featurearea:search",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-05"
-      ]
-    },
-    {
-      "source": "feature:filter-by-content-type",
-      "type": "PART_OF",
-      "target": "featurearea:search",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-05"
-      ]
-    },
-    {
-      "source": "feature:autocomplete-suggestions",
-      "type": "PART_OF",
-      "target": "featurearea:search",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-05"
-      ]
-    },
-    {
-      "source": "feature:search-history-and-clear-history",
-      "type": "PART_OF",
-      "target": "featurearea:search",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-05"
-      ]
-    },
-    {
-      "source": "feature:friend-activity-feed",
-      "type": "PART_OF",
-      "target": "featurearea:social",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-07"
-      ]
-    },
-    {
-      "source": "feature:share-links-for-tracks-albums-artists-and-playlists",
-      "type": "PART_OF",
-      "target": "featurearea:social",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-07"
-      ]
-    },
-    {
-      "source": "feature:collaborative-playlists-with-multiple-editors",
-      "type": "PART_OF",
-      "target": "featurearea:social",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-07"
-      ]
-    },
-    {
-      "source": "feature:optional-embeddable-mini-player-for-shared-content",
-      "type": "PART_OF",
-      "target": "featurearea:social",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-07"
-      ]
-    },
-    {
-      "source": "feature:follow-users",
-      "type": "PART_OF",
-      "target": "featurearea:social",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-07"
-      ]
-    },
-    {
-      "source": "feature:free-tier",
-      "type": "PART_OF",
-      "target": "featurearea:subscription-monetization",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-08"
-      ]
-    },
-    {
-      "source": "feature:plan-change-flows-cancellations-proration-behavior",
-      "type": "PART_OF",
-      "target": "featurearea:subscription-monetization",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-08"
-      ]
-    },
-    {
-      "source": "feature:payment-integration",
-      "type": "PART_OF",
-      "target": "featurearea:subscription-monetization",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-08"
-      ]
-    },
-    {
-      "source": "feature:billing-history-and-invoices",
-      "type": "PART_OF",
-      "target": "featurearea:subscription-monetization",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-08"
-      ]
-    },
-    {
-      "source": "feature:premium-tier",
-      "type": "PART_OF",
-      "target": "featurearea:subscription-monetization",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-08"
-      ]
-    },
-    {
-      "source": "feature:frequency-capping-and-rotation",
-      "type": "PART_OF",
-      "target": "featurearea:ads",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-09"
-      ]
-    },
-    {
-      "source": "feature:targeting-rules",
-      "type": "PART_OF",
-      "target": "featurearea:ads",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-09"
-      ]
-    },
-    {
-      "source": "feature:campaign-analytics",
-      "type": "PART_OF",
-      "target": "featurearea:ads",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-09"
-      ]
-    },
-    {
-      "source": "feature:audio-ad-slots-between-tracks",
-      "type": "PART_OF",
-      "target": "featurearea:ads",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-09"
-      ]
-    },
-    {
-      "source": "feature:bulk-uploads-for-labels",
-      "type": "PART_OF",
-      "target": "featurearea:creator-label-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-10"
-      ]
-    },
-    {
-      "source": "feature:analytics-dashboard",
-      "type": "PART_OF",
-      "target": "featurearea:creator-label-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-10"
-      ]
-    },
-    {
-      "source": "feature:artist-label-onboarding-and-verification",
-      "type": "PART_OF",
-      "target": "featurearea:creator-label-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-10"
-      ]
-    },
-    {
-      "source": "feature:track-and-album-upload-flows",
-      "type": "PART_OF",
-      "target": "featurearea:creator-label-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-10"
-      ]
-    },
-    {
-      "source": "feature:metadata-management",
-      "type": "PART_OF",
-      "target": "featurearea:creator-label-portal",
-      "evidence": "explicit",
-      "chunk_ids": [
-        "spotify-s05-10"
       ]
     },
     {
@@ -3471,16 +3027,502 @@
       ]
     },
     {
-      "source": "feature:track-and-playlist-level-performance-analytics",
-      "type": "PART_OF",
-      "target": "featurearea:analytics-reporting",
+      "source": "technology:next-js",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-12"
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:tailwind-css",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:recoil",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:web-audio-api",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:zustand",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:hls-js",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:pwa",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:html5-audio",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:oauth2",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:react-query",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:jotai",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "technology:oidc",
+      "type": "BELONGS_TO",
+      "target": "layer:frontend",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s01-01"
+      ]
+    },
+    {
+      "source": "page:artist-id",
+      "type": "IN_GROUP",
+      "target": "pagegroup:public",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-01"
+      ]
+    },
+    {
+      "source": "page:album-id",
+      "type": "IN_GROUP",
+      "target": "pagegroup:public",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-01"
+      ]
+    },
+    {
+      "source": "page:login",
+      "type": "IN_GROUP",
+      "target": "pagegroup:public",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-01"
+      ]
+    },
+    {
+      "source": "page:root",
+      "type": "IN_GROUP",
+      "target": "pagegroup:public",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-01"
+      ]
+    },
+    {
+      "source": "page:signup",
+      "type": "IN_GROUP",
+      "target": "pagegroup:public",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-01"
+      ]
+    },
+    {
+      "source": "page:settings-account",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:collection-tracks",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:playlist-id",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:queue",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:search",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:collection-artists",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:collection-albums",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:settings-privacy",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:home",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:settings-subscription",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:collection-playlists",
+      "type": "IN_GROUP",
+      "target": "pagegroup:authenticated-app",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-02"
+      ]
+    },
+    {
+      "source": "page:creator-analytics",
+      "type": "IN_GROUP",
+      "target": "pagegroup:creator-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-03"
+      ]
+    },
+    {
+      "source": "page:creator-dashboard",
+      "type": "IN_GROUP",
+      "target": "pagegroup:creator-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-03"
+      ]
+    },
+    {
+      "source": "page:creator-uploads",
+      "type": "IN_GROUP",
+      "target": "pagegroup:creator-portal",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-03"
+      ]
+    },
+    {
+      "source": "page:admin-content",
+      "type": "IN_GROUP",
+      "target": "pagegroup:admin",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-04"
+      ]
+    },
+    {
+      "source": "page:admin-users",
+      "type": "IN_GROUP",
+      "target": "pagegroup:admin",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-04"
+      ]
+    },
+    {
+      "source": "page:admin-flags",
+      "type": "IN_GROUP",
+      "target": "pagegroup:admin",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-04"
+      ]
+    },
+    {
+      "source": "page:admin",
+      "type": "IN_GROUP",
+      "target": "pagegroup:admin",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s04-04"
+      ]
+    },
+    {
+      "source": "feature:detailed-artist-pages",
+      "type": "PART_OF",
+      "target": "featurearea:catalog-browsing",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-04"
+      ]
+    },
+    {
+      "source": "feature:browse-by-genres-moods",
+      "type": "PART_OF",
+      "target": "featurearea:catalog-browsing",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-04"
+      ]
+    },
+    {
+      "source": "feature:podcasts-episodes",
+      "type": "PART_OF",
+      "target": "featurearea:catalog-browsing",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-04"
+      ]
+    },
+    {
+      "source": "feature:album-pages",
+      "type": "PART_OF",
+      "target": "featurearea:catalog-browsing",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-04"
+      ]
+    },
+    {
+      "source": "feature:new-releases-and-charts",
+      "type": "PART_OF",
+      "target": "featurearea:catalog-browsing",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-04"
+      ]
+    },
+    {
+      "source": "feature:autocomplete-suggestions",
+      "type": "PART_OF",
+      "target": "featurearea:search",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-05"
+      ]
+    },
+    {
+      "source": "feature:search-history-and-clear-history",
+      "type": "PART_OF",
+      "target": "featurearea:search",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-05"
+      ]
+    },
+    {
+      "source": "feature:unified-search",
+      "type": "PART_OF",
+      "target": "featurearea:search",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-05"
+      ]
+    },
+    {
+      "source": "feature:filter-by-content-type",
+      "type": "PART_OF",
+      "target": "featurearea:search",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-05"
+      ]
+    },
+    {
+      "source": "feature:auto-generated-daily-mix-style-playlists",
+      "type": "PART_OF",
+      "target": "featurearea:recommendations-discovery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-06"
+      ]
+    },
+    {
+      "source": "feature:weekly-discovery-playlist",
+      "type": "PART_OF",
+      "target": "featurearea:recommendations-discovery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-06"
+      ]
+    },
+    {
+      "source": "feature:song-radio-and-artist-radio",
+      "type": "PART_OF",
+      "target": "featurearea:recommendations-discovery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-06"
+      ]
+    },
+    {
+      "source": "feature:personalized-home-feed",
+      "type": "PART_OF",
+      "target": "featurearea:recommendations-discovery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-06"
+      ]
+    },
+    {
+      "source": "feature:because-you-listened-to-x-rows",
+      "type": "PART_OF",
+      "target": "featurearea:recommendations-discovery",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-06"
+      ]
+    },
+    {
+      "source": "feature:billing-history-and-invoices",
+      "type": "PART_OF",
+      "target": "featurearea:subscription-monetization",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-08"
+      ]
+    },
+    {
+      "source": "feature:payment-integration",
+      "type": "PART_OF",
+      "target": "featurearea:subscription-monetization",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-08"
+      ]
+    },
+    {
+      "source": "feature:premium-tier",
+      "type": "PART_OF",
+      "target": "featurearea:subscription-monetization",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-08"
+      ]
+    },
+    {
+      "source": "feature:plan-change-flows-cancellations-proration-behavior",
+      "type": "PART_OF",
+      "target": "featurearea:subscription-monetization",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-08"
+      ]
+    },
+    {
+      "source": "feature:free-tier",
+      "type": "PART_OF",
+      "target": "featurearea:subscription-monetization",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-08"
       ]
     },
     {
       "source": "feature:https-everywhere-secure-cookies-hsts",
+      "type": "PART_OF",
+      "target": "featurearea:security-compliance",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s05-13"
+      ]
+    },
+    {
+      "source": "feature:audit-logging-for-sensitive-actions",
       "type": "PART_OF",
       "target": "featurearea:security-compliance",
       "evidence": "explicit",
@@ -3507,7 +3549,7 @@
       ]
     },
     {
-      "source": "feature:audit-logging-for-sensitive-actions",
+      "source": "feature:input-validation-and-rate-limiting-at-the-gateway",
       "type": "PART_OF",
       "target": "featurearea:security-compliance",
       "evidence": "explicit",
@@ -3516,12 +3558,21 @@
       ]
     },
     {
-      "source": "feature:input-validation-and-rate-limiting-at-the-gateway",
-      "type": "PART_OF",
-      "target": "featurearea:security-compliance",
+      "source": "technology:cdn",
+      "type": "STORES",
+      "target": "event:hls-segments-and-manifests-per-track-and-bitrate",
       "evidence": "explicit",
       "chunk_ids": [
-        "spotify-s05-13"
+        "spotify-s03-05"
+      ]
+    },
+    {
+      "source": "technology:cdn",
+      "type": "STORES",
+      "target": "table:podcasts",
+      "evidence": "explicit",
+      "chunk_ids": [
+        "spotify-s03-05"
       ]
     },
     {
@@ -3672,37 +3723,9 @@
       "chunk_ids": []
     },
     {
-      "source": "service:analytics-events",
-      "type": "PUBLISHES",
-      "target": "event:stream-start",
-      "evidence": "inferred",
-      "chunk_ids": []
-    },
-    {
-      "source": "service:analytics-events",
-      "type": "PUBLISHES",
-      "target": "event:playback-events",
-      "evidence": "inferred",
-      "chunk_ids": []
-    },
-    {
-      "source": "service:analytics-events",
-      "type": "PUBLISHES",
-      "target": "event:search-events",
-      "evidence": "inferred",
-      "chunk_ids": []
-    },
-    {
       "source": "service:auth-identity",
       "type": "PUBLISHES",
       "target": "event:authentication-session-cache",
-      "evidence": "inferred",
-      "chunk_ids": []
-    },
-    {
-      "source": "service:playback-session",
-      "type": "PUBLISHES",
-      "target": "event:playback-state-cache",
       "evidence": "inferred",
       "chunk_ids": []
     },
@@ -3714,58 +3737,79 @@
       "chunk_ids": []
     },
     {
-      "source": "service:library-playlist",
+      "source": "service:playback-session",
+      "type": "PUBLISHES",
+      "target": "event:stream-start",
+      "evidence": "inferred",
+      "chunk_ids": []
+    },
+    {
+      "source": "service:analytics-events",
+      "type": "PUBLISHES",
+      "target": "event:user-and-system-events",
+      "evidence": "inferred",
+      "chunk_ids": []
+    },
+    {
+      "source": "service:analytics-events",
       "type": "PUBLISHES",
       "target": "event:likes",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
-      "source": "service:library-playlist",
+      "source": "service:analytics-events",
       "type": "PUBLISHES",
-      "target": "event:plays",
+      "target": "event:searches",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
-      "source": "service:library-playlist",
+      "source": "service:analytics-events",
       "type": "PUBLISHES",
       "target": "event:shares",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
-      "source": "service:recommendation-personalization",
-      "type": "PUBLISHES",
-      "target": "event:subscription-updated",
-      "evidence": "inferred",
-      "chunk_ids": []
-    },
-    {
-      "source": "service:notification",
-      "type": "PUBLISHES",
-      "target": "event:notification-events",
+      "source": "service:library-playlist",
+      "type": "CONSUMES",
+      "target": "event:likes",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
       "source": "service:library-playlist",
       "type": "CONSUMES",
-      "target": "event:track-uploaded",
+      "target": "event:searches",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
-      "source": "service:media-processor",
-      "type": "PUBLISHES",
-      "target": "event:track-encoded",
+      "source": "service:library-playlist",
+      "type": "CONSUMES",
+      "target": "event:shares",
       "evidence": "inferred",
       "chunk_ids": []
     },
     {
-      "source": "service:content-ingestion-creator-portal",
-      "type": "PUBLISHES",
-      "target": "event:track-uploaded",
+      "source": "service:recommendation-personalization",
+      "type": "CONSUMES",
+      "target": "event:plays",
+      "evidence": "inferred",
+      "chunk_ids": []
+    },
+    {
+      "source": "service:recommendation-personalization",
+      "type": "CONSUMES",
+      "target": "event:skips",
+      "evidence": "inferred",
+      "chunk_ids": []
+    },
+    {
+      "source": "service:recommendation-personalization",
+      "type": "CONSUMES",
+      "target": "event:completes",
       "evidence": "inferred",
       "chunk_ids": []
     }
@@ -3773,6 +3817,8 @@
   "mentions": {
     "spotify-s01-01": [
       "layer:frontend",
+      "page:root",
+      "service:api-gateway-backend-for-frontend",
       "technology:hls-js",
       "technology:html5-audio",
       "technology:jotai",
@@ -3805,7 +3851,10 @@
       "layer:databases-storage",
       "technology:cdn",
       "technology:clickhouse",
+      "technology:cloudflare",
+      "technology:cloudfront",
       "technology:elasticsearch",
+      "technology:fastly",
       "technology:opensearch",
       "technology:postgresql",
       "technology:redis",
@@ -3813,17 +3862,13 @@
     ],
     "spotify-s01-04": [
       "layer:infrastructure-devops",
-      "technology:aks",
       "technology:docker",
-      "technology:eks",
       "technology:github-actions",
       "technology:gitlab-ci",
-      "technology:gke",
       "technology:grafana",
       "technology:kubernetes",
       "technology:opentelemetry",
       "technology:prometheus",
-      "technology:secrets-manager",
       "technology:vault"
     ],
     "spotify-s02-01": [
@@ -3877,6 +3922,7 @@
     ],
     "spotify-s02-08": [
       "event:stream-start",
+      "service:analytics-events",
       "service:streaming-media-delivery"
     ],
     "spotify-s02-09": [
@@ -3911,13 +3957,16 @@
       "table:uploads"
     ],
     "spotify-s02-14": [
+      "service:catalog",
       "service:media-processor",
-      "technology:ffmpeg"
+      "service:streaming-media-delivery",
+      "technology:ffmpeg",
+      "technology:s3-compatible-object-storage"
     ],
     "spotify-s02-15": [
-      "event:events",
+      "event:user-and-system-events",
       "service:analytics-events",
-      "table:events",
+      "service:recommendation-personalization",
       "technology:clickhouse"
     ],
     "spotify-s02-16": [
@@ -4062,8 +4111,7 @@
       "feature:creator-and-label-facing-analytics",
       "feature:internal-dashboards-for-product-and-ops-teams",
       "feature:track-and-playlist-level-performance-analytics",
-      "featurearea:analytics-reporting",
-      "technology:event-tracking"
+      "featurearea:analytics-reporting"
     ],
     "spotify-s05-13": [
       "feature:audit-logging-for-sensitive-actions",
@@ -4086,28 +4134,23 @@
     ],
     "spotify-s03-02": [
       "event:authentication-session-cache",
+      "event:hot-metadata-caches",
       "event:playback-state-cache",
-      "event:rate-limits-and-hot-metadata-caches",
+      "event:rate-limits",
       "technology:redis"
     ],
     "spotify-s03-03": [
-      "table:albums",
-      "table:artists",
-      "table:playlists",
-      "table:podcasts",
-      "table:tracks",
       "technology:elasticsearch",
       "technology:opensearch"
     ],
     "spotify-s03-04": [
-      "event:clicks",
       "event:playback-events",
       "event:search-events",
-      "layer:databases-storage",
       "technology:clickhouse"
     ],
     "spotify-s03-05": [
-      "table:episodes",
+      "event:hls-segments-and-manifests-per-track-and-bitrate",
+      "table:podcasts",
       "technology:cdn",
       "technology:s3-compatible-object-storage"
     ],
@@ -4123,6 +4166,11 @@
     ]
   },
   "dropped": [
+    {
+      "chunk_id": "spotify-s01-01",
+      "item": "(Layer:Frontend)-[BELONGS_TO]->(Layer:Frontend)",
+      "reason": "label pair not allowed for this relationship"
+    },
     {
       "chunk_id": "spotify-s02-01",
       "item": "Feature:Handles auth, rate-limiting, schema validation",
@@ -4165,17 +4213,12 @@
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "Feature:Discover Weekly-like",
+      "item": "Feature:Computes user and item embeddings",
       "reason": "Feature outside the checklist section"
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "Feature:Daily Mix",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-09",
-      "item": "Feature:Radios",
+      "item": "Feature:Serves recommendations by seeds",
       "reason": "Feature outside the checklist section"
     },
     {
@@ -4190,33 +4233,28 @@
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "Feature:Discover Weekly-like",
+      "item": "Feature:Computes user and item embeddings",
       "reason": "Feature outside the checklist section"
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "(Service:Recommendation & Personalization Service)-[IMPLEMENTED_BY]->(Feature:Discover Weekly-like)",
+      "item": "(Service:Recommendation & Personalization Service)-[IMPLEMENTED_BY]->(Feature:Computes user and item embeddings)",
       "reason": "endpoint unknown or rejected"
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "Feature:Daily Mix",
+      "item": "Feature:Serves recommendations by seeds",
       "reason": "Feature outside the checklist section"
     },
     {
       "chunk_id": "spotify-s02-09",
-      "item": "(Service:Recommendation & Personalization Service)-[IMPLEMENTED_BY]->(Feature:Daily Mix)",
+      "item": "(Service:Recommendation & Personalization Service)-[IMPLEMENTED_BY]->(Feature:Serves recommendations by seeds)",
       "reason": "endpoint unknown or rejected"
     },
     {
-      "chunk_id": "spotify-s02-09",
-      "item": "Feature:Radios",
+      "chunk_id": "spotify-s02-10",
+      "item": "Feature:Following system between users",
       "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-09",
-      "item": "(Service:Recommendation & Personalization Service)-[IMPLEMENTED_BY]->(Feature:Radios)",
-      "reason": "endpoint unknown or rejected"
     },
     {
       "chunk_id": "spotify-s02-10",
@@ -4234,33 +4272,43 @@
       "reason": "Feature outside the checklist section"
     },
     {
-      "chunk_id": "spotify-s02-14",
-      "item": "Service:Catalog/Streaming services",
-      "reason": "unknown Service (closed list)"
+      "chunk_id": "spotify-s02-10",
+      "item": "Feature:Following system between users",
+      "reason": "Feature outside the checklist section"
     },
     {
-      "chunk_id": "spotify-s02-14",
-      "item": "Service:Catalog/Streaming services",
-      "reason": "unknown Service (closed list)"
-    },
-    {
-      "chunk_id": "spotify-s02-14",
-      "item": "(Service:Media Processor Service)-[NOTIFIES]->(Service:Catalog/Streaming services)",
+      "chunk_id": "spotify-s02-10",
+      "item": "(Feature:Following system between users)-[IMPLEMENTED_BY]->(Service:Social & Activity Service)",
       "reason": "endpoint unknown or rejected"
     },
     {
-      "chunk_id": "spotify-s02-15",
-      "item": "Service:Recommendation Service",
-      "reason": "unknown Service (closed list)"
+      "chunk_id": "spotify-s02-10",
+      "item": "Feature:Friend activity feed",
+      "reason": "Feature outside the checklist section"
     },
     {
-      "chunk_id": "spotify-s02-15",
-      "item": "Service:Recommendation Service",
-      "reason": "unknown Service (closed list)"
+      "chunk_id": "spotify-s02-10",
+      "item": "(Feature:Friend activity feed)-[IMPLEMENTED_BY]->(Service:Social & Activity Service)",
+      "reason": "endpoint unknown or rejected"
     },
     {
-      "chunk_id": "spotify-s02-15",
-      "item": "(Service:Analytics & Events Service)-[FEEDS]->(Service:Recommendation Service)",
+      "chunk_id": "spotify-s02-10",
+      "item": "Feature:Collaborative playlist permissions and activity",
+      "reason": "Feature outside the checklist section"
+    },
+    {
+      "chunk_id": "spotify-s02-10",
+      "item": "(Feature:Collaborative playlist permissions and activity)-[IMPLEMENTED_BY]->(Service:Social & Activity Service)",
+      "reason": "endpoint unknown or rejected"
+    },
+    {
+      "chunk_id": "spotify-s02-10",
+      "item": "Feature:Link shortening and share tracking",
+      "reason": "Feature outside the checklist section"
+    },
+    {
+      "chunk_id": "spotify-s02-10",
+      "item": "(Feature:Link shortening and share tracking)-[IMPLEMENTED_BY]->(Service:Social & Activity Service)",
       "reason": "endpoint unknown or rejected"
     },
     {
@@ -4285,78 +4333,13 @@
     },
     {
       "chunk_id": "spotify-s02-17",
-      "item": "Feature:user search",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:content management",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:moderation",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:Feature flags and configuration (A/B testing)",
+      "item": "Feature:Feature flags and configuration",
       "reason": "Feature outside the checklist section"
     },
     {
       "chunk_id": "spotify-s02-17",
       "item": "Feature:System metrics and health views",
       "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:user search",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "(Feature:user search)-[IMPLEMENTED_BY]->(Service:Admin & Backoffice Service)",
-      "reason": "endpoint unknown or rejected"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:content management",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "(Feature:content management)-[IMPLEMENTED_BY]->(Service:Admin & Backoffice Service)",
-      "reason": "endpoint unknown or rejected"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:moderation",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "(Feature:moderation)-[IMPLEMENTED_BY]->(Service:Admin & Backoffice Service)",
-      "reason": "endpoint unknown or rejected"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:Feature flags and configuration (A/B testing)",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "(Feature:Feature flags and configuration (A/B testing))-[IMPLEMENTED_BY]->(Service:Admin & Backoffice Service)",
-      "reason": "endpoint unknown or rejected"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "Feature:System metrics and health views",
-      "reason": "Feature outside the checklist section"
-    },
-    {
-      "chunk_id": "spotify-s02-17",
-      "item": "(Feature:System metrics and health views)-[IMPLEMENTED_BY]->(Service:Admin & Backoffice Service)",
-      "reason": "endpoint unknown or rejected"
     },
     {
       "chunk_id": "spotify-s04-05",

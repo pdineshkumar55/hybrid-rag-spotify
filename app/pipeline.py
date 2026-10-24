@@ -63,6 +63,7 @@ def ask(question: str, verify: bool = True) -> dict:
             "chunks": [{k: c[k] for k in ("chunk_id", "subsection", "fused_score",
                                            "vector_score", "graph_votes", "sources")}
                        for c in retrieval["chunks"]],
+            "expansion": retrieval.get("expansion"),
             "fact_count": len(retrieval["facts"]),
             "entity_count": len(retrieval["entities"]),
         },
