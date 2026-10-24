@@ -10,7 +10,7 @@ s = get_settings()
 # 1. Neo4j
 driver = GraphDatabase.driver(s.neo4j_uri, auth=(s.neo4j_username, s.neo4j_password))
 driver.verify_connectivity()
-with driver.session(database=s.neo4j_database) as session:
+with driver.session(database=s.neo4j_database or None) as session:
     count = session.run("MATCH (n) RETURN count(n) AS c").single()["c"]
 print(f"✅ Neo4j connected — {count} nodes")
 driver.close()

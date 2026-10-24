@@ -22,5 +22,7 @@ def get_driver():
 def run_query(query: str, **params) -> list[dict]:
     """Run a Cypher query and return the rows as plain dicts."""
     s = get_settings()
-    records, _, _ = get_driver().execute_query(query, parameters_=params, database_=s.neo4j_database)
+    records, _, _ = get_driver().execute_query(
+        query, parameters_=params, database_=s.neo4j_database or None
+    )
     return [r.data() for r in records]

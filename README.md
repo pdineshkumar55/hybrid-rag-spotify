@@ -164,7 +164,7 @@ cp .env.example .env      # then fill in the values
 | `OPENAI_EMBED_MODEL` | Embedding model (default `text-embedding-3-small`) |
 | `NEO4J_URI` | e.g. `neo4j+s://xxxx.databases.neo4j.io` |
 | `NEO4J_USERNAME` / `NEO4J_PASSWORD` | From the Aura credentials file |
-| `NEO4J_DATABASE` | Usually `neo4j` |
+| `NEO4J_DATABASE` | Leave empty to use the default database. On newer Aura instances its name is the instance ID, not `neo4j` |
 | `FAISS_INDEX_DIR` | Default `vectorstore` |
 | `PDF_PATH` | Default `data/raw/spotify_web_app_architecture.pdf` |
 | `API_BASE_URL` | Where the UI finds the API (default `http://localhost:8000`) |
@@ -286,6 +286,7 @@ Response (shortened):
 | Problem | Fix |
 |---|---|
 | `ServiceUnavailable` from Neo4j | The Aura Free instance is paused. Resume it in the Aura console |
+| `DatabaseNotFound ... database 'neo4j'` | Leave `NEO4J_DATABASE` empty, or set it to your Aura instance ID |
 | `AuthError` | Use the username exactly as written in the Aura credentials file |
 | `No FAISS index in 'vectorstore'` | Run `python scripts/build_vector_store.py` |
 | `Index was built with '<model>'…` | You changed `OPENAI_EMBED_MODEL`. Rebuild the FAISS index |
