@@ -1,0 +1,18 @@
+# Never bake secrets or local environments into the image
+.env
+venv/
+.venv/
+.git/
+.gitignore
+**/__pycache__/
+*.pyc
+
+# Mounted at runtime as volumes instead (see docker-compose.yml)
+data/
+vectorstore/
+
+# Not needed in the image
+Dockerfile
+docker-compose.yml
+.dockerignore
+*.md

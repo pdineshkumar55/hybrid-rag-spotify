@@ -1,0 +1,40 @@
+# Hybrid RAG app: FastAPI backend + Streamlit UI.
+#
+#   docker compose up --build        start both (UI: http://localhost:8501)
+#   docker compose down              stop
+#
+# Neo4j Aura and OpenAI are cloud services, so no database container is needed.
+
+services:
+  api:
+    build: .
+    image: hybrid-rag-spotify:latest
+    container_name: hybrid-rag-api
+    env_file: .env                      # OpenAI + Neo4j credentials (never copied into the image)
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data                # PDF + chunks.json + graph_extraction.json
+      - ./vectorstore:/app/vectorstore  # FAISS index (reused from your local build)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  ui:
+    image: hybrid-rag-spotify:latest    # same image, different command
+    container_name: hybrid-rag-ui
+    command: >
+      streamlit run ui/streamlit_app.py
+      --server.address=0.0.0.0 --server.port=8501 --server.headless=true
+    environment:
+      API_BASE_URL: http://api:8000     # containers reach each other by service name
+    ports:
+      - "8502:8501"
+    depends_on:
+      api:
+        condition: service_healthy      # wait until the API answers /health
+    restart: unless-stopped
