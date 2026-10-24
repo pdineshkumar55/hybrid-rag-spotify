@@ -1,9 +1,10 @@
 # Hybrid RAG app: FastAPI backend + Streamlit UI.
 #
-#   docker compose up --build        start both (UI: http://localhost:8501)
-#   docker compose down              stop
+#   Laptop:  docker compose up --build        UI: http://localhost:8502
+#   Server:  docker compose up -d --build     UI: https://rag.dinesh-genai.tech (via Traefik)
 #
 # Neo4j Aura and OpenAI are cloud services, so no database container is needed.
+# Ports are bound to 127.0.0.1 only: on the server, Traefik is the single public entry point.
 
 services:
   api:
@@ -12,10 +13,10 @@ services:
     container_name: hybrid-rag-api
     env_file: .env                      # OpenAI + Neo4j credentials (never copied into the image)
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"           # localhost only, never exposed to the internet
     volumes:
       - ./data:/app/data                # PDF + chunks.json + graph_extraction.json
-      - ./vectorstore:/app/vectorstore  # FAISS index (reused from your local build)
+      - ./vectorstore:/app/vectorstore  # FAISS index
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
       interval: 15s
@@ -25,7 +26,8 @@ services:
     restart: unless-stopped
 
   ui:
-    image: hybrid-rag-spotify:latest    # same image, different command
+    build: .                            # same image as the API (second build is fully cached)
+    image: hybrid-rag-spotify:latest
     container_name: hybrid-rag-ui
     command: >
       streamlit run ui/streamlit_app.py
@@ -33,8 +35,26 @@ services:
     environment:
       API_BASE_URL: http://api:8000     # containers reach each other by service name
     ports:
-      - "8502:8501"
+      - "127.0.0.1:8502:8501"           # localhost only (for the laptop / debugging)
     depends_on:
       api:
         condition: service_healthy      # wait until the API answers /health
     restart: unless-stopped
+    labels:
+      # ---- Traefik (server only; ignored on the laptop where Traefik isn't running) ----
+      - traefik.enable=true
+      # Main router: https://<RAG_DOMAIN> -> Streamlit, with a login prompt
+      - traefik.http.routers.hybrid-rag.rule=Host(`${RAG_DOMAIN:-rag.localhost}`)
+      - traefik.http.routers.hybrid-rag.entrypoints=websecure
+      - traefik.http.routers.hybrid-rag.tls.certresolver=letsencrypt
+      - traefik.http.routers.hybrid-rag.middlewares=hybrid-rag-auth
+      - traefik.http.services.hybrid-rag.loadbalancer.server.port=8501
+      # Basic auth: user:hash pairs come from BASIC_AUTH_USERS in .env
+      - traefik.http.middlewares.hybrid-rag-auth.basicauth.users=${BASIC_AUTH_USERS:-}
+      # Health check without login: https://<RAG_DOMAIN>/healthz -> Streamlit's /_stcore/health
+      - traefik.http.routers.hybrid-rag-health.rule=Host(`${RAG_DOMAIN:-rag.localhost}`) && Path(`/healthz`)
+      - traefik.http.routers.hybrid-rag-health.entrypoints=websecure
+      - traefik.http.routers.hybrid-rag-health.tls.certresolver=letsencrypt
+      - traefik.http.routers.hybrid-rag-health.middlewares=hybrid-rag-healthpath
+      - traefik.http.routers.hybrid-rag-health.service=hybrid-rag
+      - traefik.http.middlewares.hybrid-rag-healthpath.replacepath.path=/_stcore/health
