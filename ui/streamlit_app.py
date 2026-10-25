@@ -56,6 +56,21 @@ def api_post(path: str, payload: dict, headers: dict | None = None, timeout: int
     return r.json()
 
 
+def api_stream(path: str, payload: dict, timeout: int = 120):
+    """Yield the NDJSON events of a streaming endpoint one by one."""
+    import json
+    with requests.post(f"{st.session_state.api_url}{path}", json=payload,
+                       stream=True, timeout=timeout) as r:
+        if r.status_code >= 400:
+            raise RuntimeError(f"{r.status_code}: {r.text}")
+        for line in r.iter_lines(decode_unicode=True):
+            if line:
+                event = json.loads(line)
+                if event.get("type") == "error":
+                    raise RuntimeError(event["detail"])
+                yield event
+
+
 @st.cache_data(ttl=15, show_spinner=False)
 def get_health(api_url: str) -> dict:
     """Cached for 15 s so the sidebar doesn't call /health on every click."""
@@ -144,9 +159,10 @@ def graph_dot(facts: list[dict], limit: int = 18) -> str:
     return "\n".join(lines)
 
 
-def render_result(result: dict):
+def render_result(result: dict, show_answer: bool = True):
     v = result.get("verification")
-    st.markdown(result["answer"])
+    if show_answer:
+        st.markdown(result["answer"])
 
     if v:
         kind, text = VERDICT_STYLE.get(v["verdict"], ("info", v["verdict"]))
@@ -164,6 +180,17 @@ def render_result(result: dict):
     used = set(v["citations"]["used"]) if v else set()
     passages = [s for s in result["sources"] if s["type"] == "passage"]
     facts = [s for s in result["sources"] if s["type"] == "graph_fact"]
+
+    gq = next((s for s in result["sources"] if s["type"] == "graph_query"), None)
+    if gq:
+        with st.expander("🧮 Graph query (text-to-Cypher)" + ("  **(cited)**" if "Q1" in used else ""),
+                         expanded="Q1" in used):
+            st.caption(gq["text"])
+            st.code(gq["cypher"], language="cypher")
+            if gq["rows"]:
+                st.dataframe(pd.DataFrame(gq["rows"]), hide_index=True, width="stretch")
+            else:
+                st.caption("No rows returned.")
 
     tab_src, tab_graph, tab_check, tab_debug = st.tabs(
         [f"📄 Passages ({len(passages)})", f"🕸️ Graph facts ({len(facts)})",
@@ -204,6 +231,9 @@ def render_result(result: dict):
                 st.markdown(f"{icon[c['status']]} {c['claim']} {cites}{note}")
 
     with tab_debug:
+        gq_dbg = result["retrieval"].get("graph_query")
+        if gq_dbg and gq_dbg.get("error"):
+            st.caption(f"Text-to-Cypher: {gq_dbg['error']}")
         exp = result["retrieval"].get("expansion")
         if exp and exp.get("skipped"):
             st.caption(f"Query expansion not needed: {exp['skipped']}")
@@ -239,12 +269,29 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
     with st.chat_message("assistant"):
-        with st.spinner("Searching FAISS + Neo4j and asking the LLM..."):
-            try:
-                result = api_post("/query", {"question": question, "verify": verify})
-                st.session_state.history.append({"question": question, "result": result})
-                render_result(result)
-            except Exception as exc:  # noqa: BLE001
-                msg = f"Request failed: {exc}"
-                st.session_state.history.append({"question": question, "error": msg})
-                st.error(msg)
+        status = st.empty()
+        answer_box = st.empty()
+        try:
+            status.caption("🔎 Searching FAISS + Neo4j...")
+            text, result = "", None
+            for event in api_stream("/query/stream", {"question": question, "verify": verify}):
+                if event["type"] == "retrieval":
+                    status.caption("✍️ Writing the answer..." if not event.get("cached")
+                                   else "⚡ From the answer cache")
+                elif event["type"] == "token":
+                    text += event["text"]
+                    answer_box.markdown(text + "▌")          # typing cursor while streaming
+                elif event["type"] == "final":
+                    result = event["result"]
+            status.empty()
+            if result is None:
+                raise RuntimeError("The stream ended without a final answer")
+            # The verifier may have corrected the streamed draft: always show the final text
+            answer_box.markdown(result["answer"])
+            st.session_state.history.append({"question": question, "result": result})
+            render_result(result, show_answer=False)
+        except Exception as exc:  # noqa: BLE001
+            status.empty()
+            msg = f"Request failed: {exc}"
+            st.session_state.history.append({"question": question, "error": msg})
+            st.error(msg)

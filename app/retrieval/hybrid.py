@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 from app.config import get_settings
+from app.retrieval.cypher_retriever import needs_graph_query, text_to_cypher
 from app.retrieval.graph_retriever import graph_search, keyword_seeds, link_by_fulltext
 from app.retrieval.query_expansion import expand_query
 from app.retrieval.vector_retriever import get_vector_store, multi_vector_search, vector_search
@@ -53,6 +54,8 @@ def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
     f_exp = _POOL.submit(_safe_expand, question) if use_expansion else None
     f_vec = _POOL.submit(vector_search, question, k_vector)
     f_seed = _POOL.submit(link_by_fulltext, question)
+    f_cypher = (_POOL.submit(text_to_cypher, question)
+                if get_settings().text2cypher and needs_graph_query(question) else None)
 
     vec = f_vec.result()
     seeds = dict(f_seed.result())
@@ -87,6 +90,15 @@ def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
                          precomputed_seeds=seeds)
     facts, entities = graph["facts"], graph["entities"][:max_entities]
     timings["graph_s"] = round(time.perf_counter() - t2, 2)
+
+    # Text-to-Cypher result (started in phase A, usually finished by now)
+    graph_query = None
+    if f_cypher is not None:
+        try:
+            graph_query = f_cypher.result(timeout=20)
+        except Exception as exc:  # noqa: BLE001
+            graph_query = {"cypher": "", "explanation": "", "rows": None, "error": str(exc)}
+        timings["cypher_total_s"] = round(time.perf_counter() - t0, 2)
 
     # 3. Graph votes for chunks: sum of the scores of facts that cite each chunk
     graph_votes: dict[str, float] = {}
@@ -135,14 +147,26 @@ def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
         "chunks": chunks,
         "facts": facts,
         "entities": entities,
-        "context": build_context(chunks, facts, entities),
+        "graph_query": graph_query,
+        "context": build_context(chunks, facts, entities, graph_query),
     }
 
 
-def build_context(chunks: list[dict], facts: list[dict], entities: list[dict]) -> str:
+def build_context(chunks: list[dict], facts: list[dict], entities: list[dict],
+                  graph_query: dict | None = None) -> str:
     """Prompt context with citation labels the LLM must use."""
+    import json
+
     cid_to_label = {c["chunk_id"]: f"C{i}" for i, c in enumerate(chunks, start=1)}
-    lines = ["## Document passages"]
+    lines = []
+    # Exact query results first: they answer counting/ranking questions directly
+    if graph_query and graph_query.get("rows"):
+        lines.append("## Graph query result (computed over the whole knowledge graph)")
+        lines.append(f"[Q1] {graph_query['explanation']}")
+        for row in graph_query["rows"]:
+            lines.append("  " + json.dumps(row, ensure_ascii=False, default=str))
+        lines.append("")
+    lines.append("## Document passages")
     for c in chunks:
         lines.append(
             f"[{cid_to_label[c['chunk_id']]}] ({c['chunk_id']} | {c['section']} > "

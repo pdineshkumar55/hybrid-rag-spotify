@@ -12,8 +12,10 @@ ANSWER_SYSTEM = """You are an assistant that answers questions about a software
 architecture document for a Spotify-like web app.
 
 Rules:
-- Use ONLY the context below: document passages [C#], knowledge graph facts [F#]
-  and entity summaries [E#]. Do not use outside knowledge.
+- Use ONLY the context below: graph query results [Q#], document passages [C#],
+  knowledge graph facts [F#] and entity summaries [E#]. Do not use outside knowledge.
+- [Q#] results are exact counts/lists computed over the whole graph: use them for
+  "how many", "which ... most", "list all" questions, and cite them.
 - After every sentence or bullet, cite the labels that support it, e.g. [C1][F3].
 - Prefer passages [C#] for descriptions and facts [F#] for relationships
   (which service owns which table, what notifies what, etc.).
@@ -33,22 +35,40 @@ def get_chat_llm() -> ChatOpenAI:
     return ChatOpenAI(model=s.openai_chat_model, api_key=s.openai_api_key, temperature=0)
 
 
-def generate_answer(question: str, context: str, llm=None) -> str:
-    if not context.strip():
-        return NO_ANSWER
-    llm = llm or get_chat_llm()
-    msg = llm.invoke([
+def _messages(question: str, context: str) -> list:
+    return [
         ("system", ANSWER_SYSTEM.format(no_answer=NO_ANSWER)),
         ("human", f"Context:\n{context}\n\nQuestion: {question}"),
-    ])
-    text = msg.content.strip()
-    # Safety net: drop the refusal sentence if the model appended it to a real answer
+    ]
+
+
+def clean_answer(text: str) -> str:
+    """Safety net: drop the refusal sentence if the model appended it to a real answer."""
+    text = text.strip()
     if NO_ANSWER in text and text != NO_ANSWER:
         text = text.replace(NO_ANSWER, "").strip()
     return text
 
 
-CITATION_RE = re.compile(r"\[([CFE]\d+)\]")
+def generate_answer(question: str, context: str, llm=None) -> str:
+    if not context.strip():
+        return NO_ANSWER
+    llm = llm or get_chat_llm()
+    return clean_answer(llm.invoke(_messages(question, context)).content)
+
+
+def stream_answer(question: str, context: str, llm=None):
+    """Yield the answer piece by piece as the model writes it."""
+    if not context.strip():
+        yield NO_ANSWER
+        return
+    llm = llm or get_chat_llm()
+    for chunk in llm.stream(_messages(question, context)):
+        if chunk.content:
+            yield chunk.content
+
+
+CITATION_RE = re.compile(r"\[([CFEQ]\d+)\]")
 
 
 def extract_citations(text: str) -> list[str]:

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from app.generation.answer import CITATION_RE, NO_ANSWER, extract_citations, get_chat_llm
 
 VERIFY_SYSTEM = """You are a strict fact-checker for a retrieval-augmented answer.
-You get the CONTEXT (passages [C#], graph facts [F#], entity summaries [E#]),
+You get the CONTEXT (graph query results [Q#], passages [C#], graph facts [F#], entity summaries [E#]),
 the QUESTION and the ANSWER.
 
 1. Split the answer into its individual factual claims.
@@ -25,7 +25,7 @@ the QUESTION and the ANSWER.
    are, "not_supported" if none are.
 4. confidence: "high", "medium" or "low" that the answer is correct and complete.
 5. corrected_answer: if any claim is unsupported or contradicted, rewrite the answer
-   using only supported content, keeping the [C#]/[F#]/[E#] citations.
+   using only supported content, keeping the [Q#]/[C#]/[F#]/[E#] citations.
    Otherwise return an empty string.
 Judge only against the context, never against outside knowledge."""
 
@@ -77,6 +77,9 @@ def can_skip_verification(answer: str, context: str, retrieval: dict, min_score:
     inferred = {f"F{i}" for i, f in enumerate(retrieval["facts"], start=1) if f["evidence"] == "inferred"}
     if inferred & set(cites["used"]):
         return False, "cites an inferred graph fact"
+
+    if "Q1" in cites["used"]:
+        return True, "answer is based on an exact graph query result"
 
     chunks = retrieval["chunks"]
     best = max((c["vector_score"] or 0) for c in chunks) if chunks else 0

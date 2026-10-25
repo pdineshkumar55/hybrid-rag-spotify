@@ -20,33 +20,42 @@ flowchart LR
     CH --> EMB[OpenAI embeddings] --> FAISS[(FAISS index)]
     CH --> KG[LLM entity & relation extraction<br/>validated against a schema] --> NEO[(Neo4j Aura<br/>:Spotify graph)]
 
-    Q[User question] --> VR[Vector retriever]
+    Q[User question] --> EXP[Query expansion<br/>only if the direct match is weak]
+    Q --> VR[Vector retriever]
     Q --> GR[Graph retriever]
+    Q --> CY[Text-to-Cypher<br/>counting / ranking questions]
+    EXP --> VR
+    EXP --> GR
     FAISS --> VR
     NEO --> GR
+    NEO --> CY
     VR -- chunk_ids --> GR
     VR --> FUSE[Hybrid fusion<br/>Reciprocal Rank Fusion]
     GR -- facts + source chunks --> FUSE
-    FUSE --> ANS[OpenAI: cited answer]
-    ANS --> VER[OpenAI: claim-by-claim verification]
-    VER --> API[FastAPI] --> UI[Streamlit UI]
+    CY -- exact query result --> FUSE
+    FUSE --> ANS[OpenAI: cited answer<br/>streamed token by token]
+    ANS --> VER{Grounded?<br/>fast checks}
+    VER -- yes --> OUT[Answer]
+    VER -- no --> LLMV[OpenAI: claim-by-claim verification] --> OUT
+    OUT --> API[FastAPI] --> UI[Streamlit UI]
 ```
 
 ### How a question is answered
 
-1. **Vector search**: FAISS returns the top chunks by cosine similarity.
+These steps run in parallel where possible (FAISS, the graph lookups and the LLM calls overlap).
+
+0. **Query expansion** (optional): an LLM rewrites the question into the document's vocabulary (3 search queries + keywords). It only waits for this when the question's direct FAISS match is weak, so most questions don't pay for it.
+1. **Vector search**: FAISS returns the top chunks by cosine similarity, searching with every phrasing (one batched embedding call) and merging with RRF.
 2. **Graph search** finds the entities the question is about, in two ways:
    - full-text search over entity names, aliases and descriptions
    - entities **mentioned by the FAISS chunks** (`(:Chunk)-[:MENTIONS]->(entity)`). This is the bridge between the two stores.
 
    It then expands their neighbourhood: 1 hop, plus a 2nd hop along dependency links such as `Service -OWNS_TABLE-> Table` and `Service -NOTIFIES-> Service`.
-3. **Fusion**: every graph fact records the chunk(s) it came from, so the graph "votes" for chunks. **Reciprocal Rank Fusion** merges the vector ranking and the graph ranking.
-4. **Answer**: OpenAI answers **only** from the context and cites passages `[C#]`, graph facts `[F#]` and entity summaries `[E#]`.
-5. **Verification** has two parts:
-   - a rule-based check that every citation exists
-   - an LLM judge that splits the answer into claims and marks each one *supported*, *unsupported* or *contradicted*
-
-   If needed, the answer is rewritten using only supported content.
+3. **Text-to-Cypher** (counting / ranking / "list all" questions only): the LLM writes a read-only Cypher query over the whole graph. It's validated (no write keywords, must use `:Spotify`, `LIMIT` enforced) and run in a read transaction with a timeout. The exact result is cited as `[Q1]`.
+4. **Fusion**: every graph fact records the chunk(s) it came from, so the graph "votes" for chunks. **Reciprocal Rank Fusion** merges the vector ranking and the graph ranking.
+5. **Answer**: OpenAI answers **only** from the context, citing query results `[Q#]`, passages `[C#]`, graph facts `[F#]` and entity summaries `[E#]`. The answer is **streamed** to the UI as it's written.
+6. **Verification** (`VERIFY_MODE=auto`): fast checks first, with no LLM call. Every citation must exist, every sentence must be cited, no *inferred* fact may be cited, and retrieval must be confident. If all of that holds, the answer is accepted. Otherwise an LLM judge checks each claim (*supported*, *unsupported* or *contradicted*) and, if needed, rewrites the answer using only supported content.
+7. **Cache**: repeated questions are answered instantly from an in-memory cache (cleared on every ingest).
 
 ---
 
@@ -61,7 +70,7 @@ flowchart LR
 | Frontend | Streamlit |
 | PDF parsing | pypdf |
 | Config | pydantic-settings + `.env` |
-| Deployment | Docker + Docker Compose |
+| Deployment | Docker + Docker Compose, behind Traefik (HTTPS via Let's Encrypt, basic auth) on a VPS |
 
 ---
 
@@ -81,12 +90,12 @@ flowchart LR
 | `Chunk` | one per text chunk, linked to FAISS by `chunk_id` |
 
 **Relationships:**
-- `BELONGS_TO`, `OWNS_TABLE`, `USES`, `INTEGRATES_WITH`, `NOTIFIES`, `FEEDS`, `AGGREGATES`, `LOGS_EVENTS_TO`, `STORES`, `PART_OF`, `IN_GROUP`, `IMPLEMENTED_BY`, `SERVED_BY`, `PUBLISHES`, `CONSUMES`, `MENTIONS`
+- `BELONGS_TO`, `OWNS_TABLE`, `USES`, `INTEGRATES_WITH`, `NOTIFIES`, `FEEDS`, `AGGREGATES`, `LOGS_EVENTS_TO`, `STORES`, `PART_OF`, `IN_GROUP`, `IMPLEMENTED_BY`, `SERVED_BY`, `PUBLISHES`, `CONSUMES`, `CARRIES` (message queue → event), `MENTIONS`
 - Each relationship stores `evidence` (`explicit`, meaning stated in the text, or `inferred`) and the `chunk_ids` it came from.
 
 **Extraction quality controls:**
 - **Fixed lists from headings.** Services, Feature Areas, Layers and Page Groups are taken from the document headings, and the LLM cannot invent new ones.
-- **Structural links in code.** `BELONGS_TO`, `PART_OF` and `IN_GROUP` are derived from the headings, not from the LLM.
+- **Structural links in code.** `BELONGS_TO`, `PART_OF`, `IN_GROUP`, and the data-store links `STORES` / `CARRIES`, are derived from the headings, not from the LLM.
 - **Validation.** Label pairs are checked for each relationship type, backwards relationships are swapped, and new entities are kept only if they appear in the chunk text.
 - **A record of rejections.** Everything rejected is saved in `data/processed/graph_extraction.json` under `dropped`, with the reason.
 
@@ -101,7 +110,9 @@ hybrid-rag-spotify/
 ├── app/
 │   ├── config.py                 # settings from .env
 │   ├── neo4j_client.py           # shared Neo4j driver
-│   ├── pipeline.py               # ask(): retrieve → answer → verify
+│   ├── pipeline.py               # ask() / ask_stream(): retrieve → answer → verify
+│   ├── cache.py                  # answer cache (TTL)
+│   ├── evaluation.py             # evaluation metrics
 │   ├── ingestion/
 │   │   ├── loader.py             # PDF → section-aware chunks
 │   │   ├── vector_builder.py     # embeddings → FAISS
@@ -110,9 +121,11 @@ hybrid-rag-spotify/
 │   │   ├── graph_builder.py      # write to Neo4j
 │   │   └── ingest.py             # full ingest (used by POST /ingest)
 │   ├── retrieval/
-│   │   ├── vector_retriever.py
-│   │   ├── graph_retriever.py
-│   │   └── hybrid.py             # Reciprocal Rank Fusion + context builder
+│   │   ├── vector_retriever.py   # FAISS (single + multi-query)
+│   │   ├── graph_retriever.py    # entity linking + 1–2 hop expansion
+│   │   ├── cypher_retriever.py   # text-to-Cypher (read-only, validated)
+│   │   ├── query_expansion.py    # question → document vocabulary
+│   │   └── hybrid.py             # parallel retrieval, RRF fusion, context builder
 │   ├── generation/
 │   │   ├── answer.py             # cited answer
 │   │   └── verify.py             # citation check + LLM fact-check
@@ -121,7 +134,8 @@ hybrid-rag-spotify/
 ├── scripts/                      # CLI helpers (build, test, ask)
 ├── data/
 │   ├── raw/                      # source PDF
-│   └── processed/                # chunks.json, graph_extraction.json
+│   ├── processed/                # chunks.json, graph_extraction.json
+│   └── eval/                     # questions.json + saved evaluation runs
 ├── vectorstore/                  # FAISS index (generated, not in Git)
 ├── Dockerfile
 ├── docker-compose.yml
@@ -169,6 +183,13 @@ cp .env.example .env      # then fill in the values
 | `PDF_PATH` | Default `data/raw/spotify_web_app_architecture.pdf` |
 | `API_BASE_URL` | Where the UI finds the API (default `http://localhost:8000`) |
 | `ADMIN_TOKEN` | Optional. If set, it's required as the `X-Admin-Token` header for `POST /ingest` |
+| `QUERY_EXPANSION` | `true` (default) / `false`: rewrite the question before searching |
+| `EXPANSION_SKIP_MIN_SCORE` | Default `0.55`: don't wait for expansion when the direct FAISS match is at least this strong |
+| `TEXT2CYPHER` | `true` (default) / `false`: generate a Cypher query for counting / ranking questions |
+| `VERIFY_MODE` | `auto` (default: skip the verification call when the fast checks pass), `always` or `never` |
+| `VERIFY_SKIP_MIN_SCORE` | Default `0.5`: best FAISS score needed for `auto` to skip verification |
+| `ANSWER_CACHE_TTL_S` | Default `3600`: how long answers are cached; `0` turns the cache off |
+| `RAG_DOMAIN`, `BASIC_AUTH_USERS` | Server only: the public domain and the login used by Traefik (see [Deploying on a VPS](#deploying-on-a-vps-with-traefik)) |
 
 Check the connections:
 ```bash
@@ -199,7 +220,32 @@ streamlit run ui/streamlit_app.py
 python scripts/test_retrieval.py "Which services use PostgreSQL tables?"  # FAISS vs graph side by side
 python scripts/test_hybrid.py "How are subscription payments handled?"    # the exact context sent to the LLM
 python scripts/ask.py "What happens after an artist uploads a track?"     # full pipeline with verification
+python scripts/evaluate.py --label my-change                             # score the app on the evaluation set
 ```
+
+---
+
+## Evaluation
+
+`data/eval/questions.json` holds 20 questions with the chunks, graph facts and key points a good answer needs. The question types are descriptive, relational, multi-hop, aggregate (counting / ranking) and out-of-scope.
+
+```bash
+python scripts/evaluate.py --label baseline            # full run (verification on)
+python scripts/evaluate.py --ids q02 q12               # only some questions while fixing them
+python scripts/evaluate.py --no-verify                 # faster: one LLM call per question
+```
+
+Each run prints a scorecard, the failures (missing chunks, facts or key points), averages per stage, and the **change from the previous run**. Runs are saved in `data/eval/runs/`.
+
+| Metric | Meaning |
+|---|---|
+| `pass_rate` | The answer covers every key point; out-of-scope questions must be declined |
+| `chunk_recall` / `vector_recall` | Share of the expected chunks that reached the LLM (all retrievers / FAISS only) |
+| `graph_rescued_chunks` | Expected chunks that only the graph found |
+| `fact_recall` | Share of the expected graph facts returned |
+| `keyword_coverage` | Share of the key points present in the answer |
+| `verified_supported` / `verify_skipped` | Answers the LLM judge fully supported / answers accepted by the fast checks |
+| `avg_seconds` + `avg time per stage` | Latency, and where it goes |
 
 ---
 
@@ -209,8 +255,10 @@ python scripts/ask.py "What happens after an artist uploads a track?"     # full
 cp .env.example .env            # fill in your keys
 docker compose up --build
 ```
-- UI: <http://localhost:8501>
+- UI: <http://localhost:8502>
 - API docs: <http://localhost:8000/docs>
+
+Both ports are bound to `127.0.0.1`, so they're reachable only from the machine itself. On a server, Traefik is the public entry point.
 
 | Detail | How it works |
 |---|---|
@@ -235,6 +283,7 @@ docker compose up -d
 |---|---|---|
 | `GET` | `/health` | FAISS vector count, Neo4j `:Spotify` node count, model names |
 | `POST` | `/query` | `{"question": "...", "verify": true}` → answer, draft, verification, sources, retrieval details, timings |
+| `POST` | `/query/stream` | Same request, streamed as newline-delimited JSON: `{"type":"retrieval"}` → `{"type":"token","text":...}` × N → `{"type":"final","result":{...}}` |
 | `GET` | `/graph/stats` | Node and relationship counts |
 | `POST` | `/ingest` | Rebuild FAISS and/or the graph as a background job (`X-Admin-Token` header if `ADMIN_TOKEN` is set) |
 | `GET` | `/ingest/status` | State and log of the last ingest job |
@@ -261,11 +310,12 @@ Response (shortened):
 
 ## Streamlit UI
 
-- **Chat** with the cited answer and a verification badge (verified, partially supported, not supported, or not in the document) with its confidence.
+- **Chat** with the answer **streamed as it's written**, then a verification badge with its confidence: ✅ verified, ⚡ grounded (fast checks passed), ⚠️ partially supported, ❌ not supported, or ℹ️ not in the document. Cached answers are marked.
+- **🧮 Graph query**: for counting / ranking questions, the generated Cypher query and its result table.
 - **📄 Passages**: each retrieved chunk, labelled by retriever (🔎 vector, 🕸️ graph or both). Cited passages open automatically.
 - **🕸️ Graph facts**: a diagram of the facts (solid lines are stated, dashed are inferred) plus a table.
 - **✔️ Verification**: a claim-by-claim check with citations.
-- **🔧 Retrieval**: the fused ranking and timings, for debugging.
+- **🔧 Retrieval**: the query expansion (or why it was skipped), the fused ranking and timings, for debugging.
 - **Sidebar**: backend health, sample questions, and an admin panel to rebuild the data.
 
 ---
@@ -278,6 +328,8 @@ Response (shortened):
 - Which services use PostgreSQL tables?
 - What is stored in ClickHouse?
 - Which frontend pages are served by the Library & Playlist Service?
+- How many microservices does the architecture define? *(text-to-Cypher)*
+- Which service owns the most tables? *(text-to-Cypher)*
 
 ---
 
@@ -292,6 +344,39 @@ Response (shortened):
 | `Index was built with '<model>'…` | You changed `OPENAI_EMBED_MODEL`. Rebuild the FAISS index |
 | Docker: `ports are not available` | Another process (often a local Streamlit or Uvicorn) is using 8000 or 8501. Stop it, or change the host port in `docker-compose.yml` |
 | Docker on Linux: `Permission denied` writing `vectorstore/` | `sudo chown -R 1000:1000 data vectorstore` |
+| Traefik returns `404 page not found` for every site | Traefik lost its Docker connection (logs: `Cannot connect to the Docker daemon`). Run `docker restart <traefik container>` |
+| Browser shows "TRAEFIK DEFAULT CERT" | DNS didn't resolve when Traefik requested the certificate. Once it resolves, run `docker compose up -d --force-recreate ui` |
+
+---
+
+## Deploying on a VPS with Traefik
+
+This setup is used on a Hostinger VPS where **Traefik** already serves other apps on ports 80/443.
+
+1. Point a DNS **A record** (e.g. `rag`) at the VPS IP.
+2. Clone the repo, create `.env`, and add the two server-only settings:
+   ```bash
+   htpasswd -nbB <user> '<password>'          # from apache2-utils
+   ```
+   ```
+   RAG_DOMAIN=rag.example.com
+   BASIC_AUTH_USERS='<paste the htpasswd line, in SINGLE quotes>'
+   ```
+3. Build the FAISS index on the server, then start the containers (see [Run with Docker](#run-with-docker)).
+
+The `ui` service's labels in `docker-compose.yml` register the app with Traefik: HTTPS through the `letsencrypt` resolver, the basic-auth login, and `/healthz` without a login. Change the entrypoint and resolver names if your Traefik uses different ones.
+
+**Keep Aura Free awake.** Free instances pause after a few days without queries. A daily health check prevents that:
+```bash
+crontab -e
+# add:
+17 3 * * * curl -fsS -m 30 http://127.0.0.1:8000/health > /dev/null 2>&1
+```
+
+**Update after a push:**
+```bash
+git pull && docker compose up -d --build
+```
 
 ---
 
@@ -300,17 +385,22 @@ Response (shortened):
 - Never commit `.env`. It is excluded by both `.gitignore` and `.dockerignore`.
 - The UI talks to the API over Docker's internal network, so **don't expose port 8000 publicly**. Open only the UI port, or put it behind a reverse proxy.
 - Set `ADMIN_TOKEN` so nobody else can trigger `/ingest`.
-- The Streamlit UI has no login. Put it behind a reverse proxy (Caddy or Nginx) with HTTPS and basic auth so others can't spend your OpenAI credits.
+- The Streamlit UI has no login of its own. Keep it behind the reverse proxy's basic auth (Traefik here) so others can't spend your OpenAI credits, and set a monthly budget limit in the OpenAI dashboard.
+- Text-to-Cypher queries are validated and run in **read** transactions with a timeout, so a generated query can't change data.
 
 ---
 
 ## Roadmap
 
-- [ ] An evaluation set (questions with expected answers) and a scoring script
-- [ ] Graph quality: more cross-section links, separating service duties from checklist features
-- [ ] Retrieval tuning: question rewriting before search, threshold tuning
-- [ ] Production compose file with Caddy (HTTPS and basic auth)
-- [ ] Support for uploading other architecture documents
+- [x] Evaluation set and scoring script
+- [x] Query expansion, parallel retrieval, answer cache, auto-verification
+- [x] Streaming answers
+- [x] Text-to-Cypher for counting / ranking questions
+- [x] HTTPS + basic auth behind Traefik
+- [ ] Larger held-out evaluation set and an LLM-judge correctness score
+- [ ] Graph fact ranking by relevance to the top chunks
+- [ ] Follow-up questions (chat history) and 👍/👎 feedback
+- [ ] Support for uploading other architecture documents (per-document schema)
 
 ---
 

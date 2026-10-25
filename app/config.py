@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Don't wait for expansion when the question already has a strong FAISS match
     expansion_skip_min_score: float = 0.55
 
+    # Text-to-Cypher for counting / ranking questions (1 extra LLM call, only when needed)
+    text2cypher: bool = True
+
     # Verification: "auto" skips the 2nd LLM call when cheap checks show a well-grounded
     # answer; "always" verifies every answer; "never" turns verification off.
     verify_mode: str = "auto"
