@@ -55,8 +55,8 @@ def score_question(item: dict, result: dict) -> dict:
         "verdict": v.get("verdict"),
         "confidence": v.get("confidence"),
         "was_corrected": result.get("was_corrected", False),
-        "seconds": result.get("timings", {}).get("total_s")
-                   or round(sum(result.get("timings", {}).values()), 2),
+        "seconds": result.get("timings", {}).get("total_s"),
+        "timings": {k: v for k, v in result.get("timings", {}).items() if isinstance(v, (int, float))},
         "answer": answer,
     }
 
@@ -86,11 +86,17 @@ def summarize(rows: list[dict]) -> dict:
         "keyword_coverage": mean("keyword_coverage", in_scope),
         "verified_supported": round(sum(r["verdict"] == "supported" for r in in_scope) / len(in_scope), 3)
                               if in_scope else None,
+        "verify_skipped": sum(r["verdict"] == "auto_accepted" for r in rows),
         "corrected_by_verifier": sum(r["was_corrected"] for r in rows),
         "out_of_scope_correct": f"{sum(r['oos_correct'] for r in oos)}/{len(oos)}" if oos else None,
         "avg_seconds": mean("seconds", rows),
+        "avg_stage_s": {},
         "by_type": {},
     }
+    stage_keys = sorted({k for r in rows for k in (r.get("timings") or {}) if k != "total_s"})
+    for k in stage_keys:
+        vals = [r["timings"][k] for r in rows if k in (r.get("timings") or {})]
+        summary["avg_stage_s"][k] = round(sum(vals) / len(vals), 2)
     for t in sorted({r["type"] for r in in_scope}):
         subset = [r for r in in_scope if r["type"] == t]
         summary["by_type"][t] = {

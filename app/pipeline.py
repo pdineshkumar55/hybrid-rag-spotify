@@ -4,9 +4,13 @@
 """
 import time
 
+from app.cache import TTLCache, normalize_question
+from app.config import get_settings
 from app.generation.answer import generate_answer
-from app.generation.verify import verify_answer
+from app.generation.verify import can_skip_verification, check_citations, verify_answer
 from app.retrieval.hybrid import hybrid_retrieve
+
+ANSWER_CACHE = TTLCache(maxsize=256, ttl_s=get_settings().answer_cache_ttl_s or 1)
 
 
 def _sources(retrieval: dict) -> list[dict]:
@@ -33,11 +37,20 @@ def _sources(retrieval: dict) -> list[dict]:
 
 
 def ask(question: str, verify: bool = True) -> dict:
-    timings = {}
+    s = get_settings()
+    mode = s.verify_mode if verify else "never"
+    cache_key = (normalize_question(question), mode)
 
+    if s.answer_cache_ttl_s > 0:
+        cached = ANSWER_CACHE.get(cache_key)
+        if cached is not None:
+            return {**cached, "cached": True, "timings": {"total_s": 0.0, "cache_hit": True}}
+
+    timings = {}
     t = time.perf_counter()
     retrieval = hybrid_retrieve(question)
     timings["retrieval_s"] = round(time.perf_counter() - t, 2)
+    timings.update(retrieval.get("timings", {}))
 
     t = time.perf_counter()
     draft = generate_answer(question, retrieval["context"])
@@ -45,13 +58,34 @@ def ask(question: str, verify: bool = True) -> dict:
 
     verification = None
     final = draft
-    if verify:
-        t = time.perf_counter()
-        verification = verify_answer(question, retrieval["context"], draft)
-        timings["verify_s"] = round(time.perf_counter() - t, 2)
-        if verification["verdict"] != "supported" and verification.get("corrected_answer"):
-            final = verification["corrected_answer"]
+    if mode != "never":
+        skip, reason = (False, "")
+        if mode == "auto":
+            skip, reason = can_skip_verification(draft, retrieval["context"], retrieval,
+                                                 s.verify_skip_min_score)
+        if skip:
+            verification = {
+                "verdict": "auto_accepted", "confidence": "high", "claims": [],
+                "corrected_answer": "", "reason": reason,
+                "citations": check_citations(draft, retrieval["context"]),
+            }
+        else:
+            t = time.perf_counter()
+            verification = verify_answer(question, retrieval["context"], draft)
+            verification["reason"] = reason or "verify_mode=always"
+            timings["verify_s"] = round(time.perf_counter() - t, 2)
+            if verification["verdict"] != "supported" and verification.get("corrected_answer"):
+                final = verification["corrected_answer"]
 
+    timings["total_s"] = round(sum(v for k, v in timings.items()
+                                   if k in ("retrieval_s", "answer_s", "verify_s")), 2)
+    result = _build_result(question, final, draft, verification, retrieval, timings)
+    if s.answer_cache_ttl_s > 0:
+        ANSWER_CACHE.set(cache_key, result)
+    return {**result, "cached": False}
+
+
+def _build_result(question, final, draft, verification, retrieval, timings) -> dict:
     return {
         "question": question,
         "answer": final,

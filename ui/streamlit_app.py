@@ -30,6 +30,7 @@ VERDICT_STYLE = {
     "partially_supported": ("warning", "⚠️ Partially supported: some claims were removed or are unsupported"),
     "not_supported": ("error", "❌ Not supported by the sources"),
     "no_answer": ("info", "ℹ️ The document doesn't cover this question"),
+    "auto_accepted": ("success", "⚡ Grounded: passed the fast checks, so the verification call was skipped"),
 }
 SOURCE_BADGE = {"vector": "🔎 vector", "graph": "🕸️ graph"}
 
@@ -150,6 +151,10 @@ def render_result(result: dict):
     if v:
         kind, text = VERDICT_STYLE.get(v["verdict"], ("info", v["verdict"]))
         getattr(st, kind)(f"{text}  ·  confidence: **{v['confidence']}**")
+        if v.get("reason"):
+            st.caption(f"Verification: {v['reason']}")
+    if result.get("cached"):
+        st.caption("⚡ Served from the answer cache")
         if v["citations"]["invalid"]:
             st.caption(f"Invalid citations removed/flagged: {', '.join(v['citations']['invalid'])}")
     if result.get("was_corrected"):
@@ -200,6 +205,8 @@ def render_result(result: dict):
 
     with tab_debug:
         exp = result["retrieval"].get("expansion")
+        if exp and exp.get("skipped"):
+            st.caption(f"Query expansion not needed: {exp['skipped']}")
         if exp and len(exp.get("queries", [])) > 1:
             st.markdown("**Query expansion**")
             st.caption("Searched as: " + " · ".join(f"“{q}”" for q in exp["queries"]))

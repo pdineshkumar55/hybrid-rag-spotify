@@ -9,14 +9,19 @@
 5. build_context() formats passages [C1..], graph facts [F1..] and entity
    summaries [E1..] as the prompt context for the LLM (Step 8).
 """
+import time
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 from app.config import get_settings
-from app.retrieval.graph_retriever import graph_search
+from app.retrieval.graph_retriever import graph_search, keyword_seeds, link_by_fulltext
 from app.retrieval.query_expansion import expand_query
 from app.retrieval.vector_retriever import get_vector_store, multi_vector_search, vector_search
 
 RRF_K = 10  # small corpus -> small k keeps the top ranks distinct
+
+# Shared worker pool: OpenAI and Neo4j calls are network-bound, so threads overlap well
+_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="retrieval")
 
 
 @lru_cache
@@ -29,26 +34,59 @@ def _rrf(rank: int) -> float:
     return 1.0 / (RRF_K + rank)
 
 
+def _safe_expand(question: str) -> dict:
+    try:
+        return expand_query(question)
+    except Exception as exc:  # noqa: BLE001  (never fail a question because of this step)
+        print(f"[query_expansion] skipped: {exc}")
+        return {"queries": [question], "keywords": []}
+
+
 def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
                     max_facts: int = 25, max_entities: int = 6) -> dict:
-    # 0. Query expansion: rewrite the question into the document's vocabulary
+    timings: dict[str, float] = {}
+    t0 = time.perf_counter()
+    use_expansion = get_settings().query_expansion
+
+    # Phase A (in parallel): expansion LLM call | FAISS for the original question |
+    #                        graph full-text lookup for the original question
+    f_exp = _POOL.submit(_safe_expand, question) if use_expansion else None
+    f_vec = _POOL.submit(vector_search, question, k_vector)
+    f_seed = _POOL.submit(link_by_fulltext, question)
+
+    vec = f_vec.result()
+    seeds = dict(f_seed.result())
     expansion = {"queries": [question], "keywords": []}
-    if get_settings().query_expansion:
-        try:
-            expansion = expand_query(question)
-        except Exception as exc:  # noqa: BLE001  (never fail a question because of this step)
-            print(f"[query_expansion] skipped: {exc}")
+    timings["phase_a_s"] = round(time.perf_counter() - t0, 2)
 
-    # 1. Vector search (every phrasing, merged with RRF)
-    if len(expansion["queries"]) > 1:
-        vec = multi_vector_search(expansion["queries"], k=k_vector)
-    else:
-        vec = vector_search(question, k=k_vector)
+    # Phase B (in parallel, only if expansion produced something): FAISS for all phrasings
+    # in ONE embedding call | graph full-text lookup for the expansion keywords
+    best = vec[0]["score"] if vec else 0.0
+    if f_exp is not None and best >= get_settings().expansion_skip_min_score:
+        # Strong direct match: answer from it instead of waiting for the expansion LLM call.
+        # (The call finishes in the background and is cached for repeat questions.)
+        expansion = {"queries": [question], "keywords": [],
+                     "skipped": f"strong direct match ({best:.2f})"}
+        f_exp = None
+    if f_exp is not None:
+        expansion = f_exp.result()
+        timings["expansion_s"] = round(time.perf_counter() - t0, 2)
+        t1 = time.perf_counter()
+        f_multi = (_POOL.submit(multi_vector_search, expansion["queries"], k_vector)
+                   if len(expansion["queries"]) > 1 else None)
+        f_kw = _POOL.submit(keyword_seeds, expansion["keywords"])
+        if f_multi is not None:
+            vec = f_multi.result()
+        for uid, score in f_kw.result().items():
+            seeds[uid] = max(seeds.get(uid, 0), score)
+        timings["phase_b_s"] = round(time.perf_counter() - t1, 2)
 
-    # 2. Graph search, seeded by the question, the expansion keywords and the vector hits
+    # Phase C: graph expansion, seeded by question + keywords + the FAISS chunks
+    t2 = time.perf_counter()
     graph = graph_search(question, chunk_ids=[r["chunk_id"] for r in vec], max_facts=max_facts,
-                         keywords=expansion["keywords"])
+                         precomputed_seeds=seeds)
     facts, entities = graph["facts"], graph["entities"][:max_entities]
+    timings["graph_s"] = round(time.perf_counter() - t2, 2)
 
     # 3. Graph votes for chunks: sum of the scores of facts that cite each chunk
     graph_votes: dict[str, float] = {}
@@ -93,6 +131,7 @@ def hybrid_retrieve(question: str, k_vector: int = 5, max_chunks: int = 6,
     return {
         "question": question,
         "expansion": expansion,
+        "timings": timings,
         "chunks": chunks,
         "facts": facts,
         "entities": entities,

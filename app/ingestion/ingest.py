@@ -14,9 +14,12 @@ EXTRACTION_PATH = "data/processed/graph_extraction.json"
 
 def clear_caches() -> None:
     """Make the running API pick up the rebuilt index/graph without a restart."""
-    from app.retrieval import hybrid, vector_retriever
+    from app import pipeline
+    from app.retrieval import hybrid, query_expansion, vector_retriever
     vector_retriever.get_vector_store.cache_clear()
     hybrid._chunk_lookup.cache_clear()
+    query_expansion.expand_query.cache_clear()
+    pipeline.ANSWER_CACHE.clear()
 
 
 def run_ingest(rebuild_vectors: bool = True, rebuild_graph: bool = True,

@@ -18,6 +18,16 @@ class Settings(BaseSettings):
 
     # Rewrite the question into document vocabulary before searching (1 extra small LLM call)
     query_expansion: bool = True
+    # Don't wait for expansion when the question already has a strong FAISS match
+    expansion_skip_min_score: float = 0.55
+
+    # Verification: "auto" skips the 2nd LLM call when cheap checks show a well-grounded
+    # answer; "always" verifies every answer; "never" turns verification off.
+    verify_mode: str = "auto"
+    verify_skip_min_score: float = 0.5   # best FAISS cosine score needed to skip verification
+
+    # Cache whole answers for repeated questions (0 disables)
+    answer_cache_ttl_s: int = 3600
 
     pdf_path: str = "data/raw/spotify_web_app_architecture.pdf"
     api_base_url: str = "http://localhost:8000"

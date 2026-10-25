@@ -181,8 +181,17 @@ def expand(seeds: dict[str, float], max_facts: int = 40) -> tuple[list[dict], li
 
 
 # ---------------------------------------------------------------- public API
+def keyword_seeds(keywords: list[str]) -> dict[str, float]:
+    """Full-text seeds for expansion keywords, down-weighted (see KEYWORD_SEED_WEIGHT)."""
+    if not keywords:
+        return {}
+    return {uid: round(score * KEYWORD_SEED_WEIGHT, 3)
+            for uid, score in link_by_fulltext(" ".join(keywords)).items()}
+
+
 def graph_search(question: str, chunk_ids: list[str] | None = None, max_facts: int = 40,
-                 keywords: list[str] | None = None) -> dict:
+                 keywords: list[str] | None = None,
+                 precomputed_seeds: dict[str, float] | None = None) -> dict:
     """Graph context for a question.
 
     chunk_ids: FAISS chunk IDs for the same question (optional) — their entities
@@ -192,10 +201,12 @@ def graph_search(question: str, chunk_ids: list[str] | None = None, max_facts: i
     # The user's own words get full weight; expansion keywords are searched
     # separately at a lower weight, so they add seeds without pushing out the
     # entities the question actually names (e.g. the "devices" table).
-    seeds = link_by_fulltext(question)
-    if keywords:
-        for uid, score in link_by_fulltext(" ".join(keywords)).items():
-            seeds[uid] = max(seeds.get(uid, 0), round(score * KEYWORD_SEED_WEIGHT, 3))
+    if precomputed_seeds is not None:   # hybrid.py already ran the full-text lookups in parallel
+        seeds = dict(precomputed_seeds)
+    else:
+        seeds = link_by_fulltext(question)
+        for uid, score in keyword_seeds(keywords or []).items():
+            seeds[uid] = max(seeds.get(uid, 0), score)
     for uid, score in link_by_chunks(chunk_ids or []).items():
         seeds[uid] = max(seeds.get(uid, 0), score)
     entities, facts = expand(seeds, max_facts=max_facts)

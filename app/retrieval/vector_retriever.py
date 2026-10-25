@@ -31,8 +31,11 @@ def multi_vector_search(queries: list[str], k: int = 5, min_score: float = 0.25,
     'score' stays the best cosine similarity seen, for display/thresholds.
     """
     merged: dict[str, dict] = {}
-    for q in dict.fromkeys(q.strip() for q in queries if q.strip()):
-        for rank, r in enumerate(vector_search(q, k=k, min_score=min_score), start=1):
+    unique = list(dict.fromkeys(q.strip() for q in queries if q.strip()))
+    per_query = get_vector_store().search_many(unique, k=k)  # one embedding call for all
+    for q, results in zip(unique, per_query):
+        hits = [r for r in results if r["score"] >= min_score]
+        for rank, r in enumerate(hits, start=1):
             m = merged.setdefault(r["chunk_id"], {**r, "rrf": 0.0, "matched_queries": []})
             m["rrf"] += 1.0 / (rrf_k + rank)
             m["score"] = max(m["score"], r["score"])

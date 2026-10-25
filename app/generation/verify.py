@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.generation.answer import NO_ANSWER, extract_citations, get_chat_llm
+from app.generation.answer import CITATION_RE, NO_ANSWER, extract_citations, get_chat_llm
 
 VERIFY_SYSTEM = """You are a strict fact-checker for a retrieval-augmented answer.
 You get the CONTEXT (passages [C#], graph facts [F#], entity summaries [E#]),
@@ -52,6 +52,38 @@ def check_citations(answer: str, context: str) -> dict:
         "invalid": [c for c in used if c not in available],
         "has_citations": bool(used),
     }
+
+
+def can_skip_verification(answer: str, context: str, retrieval: dict, min_score: float) -> tuple[bool, str]:
+    """Cheap checks (no LLM). All must hold to skip the verification call:
+    1. every citation label exists in the context, and there is at least one
+    2. every content line of the answer carries a citation
+    3. no "inferred" graph fact is cited (those are the riskiest claims)
+    4. retrieval was confident: a strong FAISS match, or a chunk found by BOTH retrievers
+    """
+    if answer.strip() == NO_ANSWER:
+        return True, "no-answer reply"
+    cites = check_citations(answer, context)
+    if not cites["has_citations"] or cites["invalid"]:
+        return False, "missing or invalid citations"
+
+    for line in answer.splitlines():
+        text = line.strip().strip("-*• ").strip()
+        if len(text) < 25 or text.endswith(":"):   # headings / short connective lines
+            continue
+        if not CITATION_RE.search(text):
+            return False, "a sentence has no citation"
+
+    inferred = {f"F{i}" for i, f in enumerate(retrieval["facts"], start=1) if f["evidence"] == "inferred"}
+    if inferred & set(cites["used"]):
+        return False, "cites an inferred graph fact"
+
+    chunks = retrieval["chunks"]
+    best = max((c["vector_score"] or 0) for c in chunks) if chunks else 0
+    both = any(set(c["sources"]) == {"vector", "graph"} for c in chunks)
+    if best < min_score and not both:
+        return False, f"weak retrieval (best score {best:.2f})"
+    return True, f"grounded (best score {best:.2f}{', vector+graph agree' if both else ''})"
 
 
 def verify_answer(question: str, context: str, answer: str, llm=None) -> dict:

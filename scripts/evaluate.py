@@ -23,14 +23,15 @@ from app.evaluation import score_question, summarize
 QUESTIONS = Path("data/eval/questions.json")
 RUNS_DIR = Path("data/eval/runs")
 METRICS = ["pass_rate", "chunk_recall", "vector_recall", "graph_rescued_chunks", "fact_recall",
-           "keyword_coverage", "verified_supported", "corrected_by_verifier", "avg_seconds"]
+           "keyword_coverage", "verified_supported", "verify_skipped", "corrected_by_verifier",
+           "avg_seconds"]
 
 
 def ask_local(question: str, verify: bool) -> dict:
     from app.pipeline import ask
     t = time.perf_counter()
     r = ask(question, verify=verify)
-    r["timings"]["total_s"] = round(time.perf_counter() - t, 2)
+    r["timings"] = {**r["timings"], "total_s": round(time.perf_counter() - t, 2)}
     return r
 
 
@@ -117,6 +118,8 @@ def main():
                 line += f"   ({'+' if delta > 0 else ''}{delta:.2f})"
         print(line)
     print(f"  {'out_of_scope_correct':<22} {summary['out_of_scope_correct']:>6}")
+    if summary.get("avg_stage_s"):
+        print("  avg time per stage:   " + "  ".join(f"{k}={v}" for k, v in summary["avg_stage_s"].items()))
     for t, s in summary["by_type"].items():
         print(f"  [{t}] n={s['n']} pass={fmt(s['pass_rate'])} chunks={fmt(s['chunk_recall'])} "
               f"facts={fmt(s['fact_recall'])} keys={fmt(s['keyword_coverage'])}")

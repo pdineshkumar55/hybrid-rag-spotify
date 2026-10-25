@@ -96,8 +96,19 @@ class VectorStore:
         """Return the top-k chunks: [{chunk_id, score, page_content, metadata}, ...]."""
         q = _to_matrix([self.embeddings.embed_query(query)])
         scores, idxs = self.index.search(q, min(k, self.index.ntotal))
+        return self._rows(scores[0], idxs[0])
+
+    def search_many(self, queries: list[str], k: int = 5) -> list[list[dict]]:
+        """Like search() for several queries, with ONE embedding API call for all of them."""
+        if not queries:
+            return []
+        q = _to_matrix(self.embeddings.embed_documents(queries))
+        scores, idxs = self.index.search(q, min(k, self.index.ntotal))
+        return [self._rows(s, i) for s, i in zip(scores, idxs)]
+
+    def _rows(self, scores, idxs) -> list[dict]:
         results = []
-        for score, idx in zip(scores[0], idxs[0]):
+        for score, idx in zip(scores, idxs):
             if idx == -1:
                 continue
             doc = self.docs[idx]
